@@ -4,7 +4,7 @@
 {% block crumb %}<b>Reporting</b>{% endblock %}
 {% block content %}
 
-{% call ui.page_header('Reporting & Analytics', 'The state of data quality across the control layer, from the latest engine run and the run history.') %}
+{% call ui.page_header('Reporting & Analytics', 'The state of data quality across the control layer, for a selected engine run and the run history.') %}
   <a href="{{ url_for('runs') }}" class="btn btn-ghost">{{ ui.icon('box') }} Runs</a>
   <form method="post" action="{{ url_for('run_now') }}" style="display:inline">
     <button class="btn btn-primary">{{ ui.icon('refresh') }} Run engine now</button>
@@ -17,15 +17,21 @@
 {% else %}
 
 <div class="toolbar">
-  <div class="chipset" id="audToggle">
-    <button class="fchip on" data-aud-set="all">All</button>
-    <button class="fchip" data-aud-set="biz">Control owners &amp; risk</button>
-    <button class="fchip" data-aud-set="eng">Data engineers</button>
+  <div class="run-picker">
+    <label class="sortsel">{{ ui.icon('box') }}
+      <select aria-label="Reporting run"
+              onchange="location = this.value == '{{ ctx.runs[0].run_id }}' ? '{{ url_for('reporting') }}' : '{{ url_for('reporting') }}?run=' + this.value">
+        {% for r in ctx.runs -%}
+        <option value="{{ r.run_id }}" {{ 'selected' if r.run_id == ctx.focus_id }}>{{ r.run_id[:8] }} · {{ r.timestamp[:16]|replace('T', ' ') }}Z · {{ r.counts.PASS }}P/{{ r.counts.FAIL }}F{% if r.counts.ERROR %}/{{ r.counts.ERROR }}E{% endif %}{{ ' · latest' if loop.first }}</option>
+        {%- endfor %}
+      </select>
+    </label>
+    <span class="muted small">
+      {% if not ctx.is_latest %}<span class="badge warn">not the latest run</span> {% endif %}
+      <a href="{{ url_for('run_detail', run_id=ctx.focus_id) }}">open run</a>
+      {% if ctx.age_h is not none %}· {{ '%.0f'|format(ctx.age_h) }} h ago{% endif %}
+    </span>
   </div>
-  <span class="muted small" style="margin-left:auto">
-    Latest run <a href="{{ url_for('run_detail', run_id=ctx.latest.run_id) }}"><code>{{ ctx.latest.run_id[:8] }}</code></a>
-    {% if ctx.age_h is not none %}· {{ '%.0f'|format(ctx.age_h) }} h ago{% endif %}
-  </span>
 </div>
 
 <!-- ============ KPI strip ============ -->
@@ -36,7 +42,7 @@
     <div class="stat-foot">
       {% if ctx.delta is not none and ctx.delta != 0 %}
         <span class="kpi-delta {{ 'up' if ctx.delta > 0 else 'down' }}">
-          {{ '&#9650;' if ctx.delta > 0 else '&#9660;' }} {{ ctx.delta|abs }}</span> vs previous run
+          {{ ('&#9650;' if ctx.delta > 0 else '&#9660;')|safe }} {{ ctx.delta|abs }}</span> vs previous run
       {% elif ctx.delta == 0 %}no change vs previous run
       {% else %}first run{% endif %}
       {{ charts.sparkline(ctx.score_series)|safe }}
@@ -53,10 +59,7 @@
              'errored = broken source or config') }}
 </div>
 
-<!-- ============ Business ============ -->
-<h2 class="sec-head" data-aud="biz all">For control owners &amp; risk</h2>
-
-<div class="grid grid-2" data-aud="biz all">
+<div class="grid grid-2">
   <div class="card card-pad">
     <h3 style="margin-bottom:10px">Overall data quality</h3>
     {{ charts.score_bar(ctx.score, ctx.delta)|safe }}
@@ -75,7 +78,7 @@
   </div>
 </div>
 
-<div class="card" style="margin-top:16px" data-aud="biz all">
+<div class="card" style="margin-top:16px">
   <div class="card-head"><h2>Dataset health</h2><span class="muted small">worst first</span></div>
   <div class="card-pad">
     {% for d in ctx.ds_scores|sort(attribute='dq_score') %}
@@ -97,7 +100,7 @@
   </div>
 </div>
 
-<div class="card" style="margin-top:16px" data-aud="biz all">
+<div class="card" style="margin-top:16px">
   <div class="card-head"><h2>Coverage &amp; status</h2>
     <span class="muted small">green = controlled &amp; passing · red = controlled &amp; failing · grey = no control</span>
   </div>
@@ -116,7 +119,7 @@
   </div>
 </div>
 
-<div class="grid grid-2" style="margin-top:16px" data-aud="biz all">
+<div class="grid grid-2" style="margin-top:16px">
   <div class="card card-pad">
     <h3 style="margin-bottom:10px">Open issues &mdash; failing High-severity controls</h3>
     {% if ctx.alerts %}
@@ -135,75 +138,6 @@
   <div class="card card-pad">
     <h3 style="margin-bottom:10px">Exceptions by owner <span class="muted small">(accountability)</span></h3>
     {{ charts.hbars(ctx.by_owner, 'key', 'total_exceptions', 'warn')|safe }}
-  </div>
-</div>
-
-<!-- ============ Engineering ============ -->
-<h2 class="sec-head" data-aud="eng all">For data engineers</h2>
-
-<div class="grid grid-2" data-aud="eng all">
-  <div class="card card-pad">
-    <h3 style="margin-bottom:10px">Exceptions by DQ dimension</h3>
-    {{ charts.hbars(ctx.by_dim, 'key', 'total_exceptions', 'bad')|safe }}
-  </div>
-  <div class="card card-pad">
-    <h3 style="margin-bottom:10px">Top offending rules <span class="muted small">(this run)</span></h3>
-    {{ charts.hbars(ctx.by_rule, 'key', 'total_exceptions', 'bad')|safe }}
-  </div>
-</div>
-
-<div class="card" style="margin-top:16px" data-aud="eng all">
-  <div class="card-head"><h2>Rule reliability</h2><span class="muted small">last {{ ctx.trend|length }} runs</span></div>
-  <div class="card-pad scroll-x">
-    <table class="doc">
-      <thead><tr><th>Rule</th><th>Type</th><th>Sev.</th><th>Fail rate</th><th></th><th>Last run</th></tr></thead>
-      <tbody>
-      {% for r in ctx.reliability %}
-      <tr>
-        <td><a href="{{ url_for('rule_edit', rule_id=r.rule_id) }}"><code>{{ r.rule_id }}</code></a> {{ r.name }}</td>
-        <td>{{ r.type }}</td>
-        <td>{{ ui.sev_pill(r.severity) }}</td>
-        <td class="nowrap">{{ r.fail + r.error }} / {{ r.runs }}
-          {%- if r.error %} <span class="muted">({{ r.error }} err)</span>{% endif %}</td>
-        <td style="width:120px">{{ charts.mini_bar(r.fail + r.error, r.runs, 'bad')|safe }}</td>
-        <td>{{ ui.status_dot(r.last) }} {{ r.last }}</td>
-      </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div class="grid grid-2" style="margin-top:16px" data-aud="eng all">
-  <div class="card card-pad">
-    <h3 style="margin-bottom:10px">What changed since the previous run</h3>
-    {% if ctx.changed %}
-      {% for c in ctx.changed %}
-      <div class="chg {{ 'up' if c.improved else 'down' }}">
-        {{ '&#9650;' if c.improved else '&#9660;' }}
-        <b>{{ c.rule_id }}</b> {{ c.name }} &mdash;
-        {% if c.kind == 'flip' %}{{ c.frm }} &rarr; {{ c.to }}
-        {% else %}{{ '+' if c.exc_delta > 0 else '' }}{{ c.exc_delta }} exception(s){% endif %}
-      </div>
-      {% endfor %}
-    {% elif not ctx.prev %}
-      <div class="muted small">No previous run to compare against.</div>
-    {% else %}
-      <div class="empty">{{ ui.icon('check') }}<div>No control changed status since the previous run.</div></div>
-    {% endif %}
-  </div>
-  <div class="card card-pad">
-    <h3 style="margin-bottom:10px">Broken controls <span class="muted small">(ERROR &mdash; source or config)</span></h3>
-    {% if ctx.error_rules %}
-      {% for r in ctx.error_rules %}
-      <div class="alert-item">
-        <div><b>{{ r.rule_id }}</b> {{ r.control_name }}</div>
-        <div class="muted small">{{ r.error or 'execution error' }}</div>
-      </div>
-      {% endfor %}
-    {% else %}
-      <div class="empty">{{ ui.icon('check') }}<div>Every control executed &mdash; no ERROR results.</div></div>
-    {% endif %}
   </div>
 </div>
 

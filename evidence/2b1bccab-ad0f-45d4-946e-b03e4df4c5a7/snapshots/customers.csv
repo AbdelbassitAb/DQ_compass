@@ -1,7 +1,0 @@
-customer_id,name,email,country
-CUST001,Dupont SARL,contact@dupont.fr,FR
-CUST002,Martin SA,martin@martin.fr,FR
-CUST003,Verlinden BV,info@verlinden.be,BE
-CUST004,Petit EURL,petit@petit.fr,FR
-CUST005,Rousseau SAS,rousseau@rousseau.fr,FR
-CUST006,Schmidt GmbH,schmidt@schmidt.de,DE

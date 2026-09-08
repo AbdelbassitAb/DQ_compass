@@ -40,7 +40,9 @@ def check_validity(df: pd.DataFrame, field: str, allowed_values: list | None = N
         mask_invalid = ~series.isin(allowed_values)
     elif regex is not None:
         pattern = re.compile(regex)
-        mask_invalid = ~series.astype(str).apply(lambda v: bool(pattern.match(v)))
+        # fullmatch: the WHOLE value must conform to the format, not just a prefix
+        # (re.match anchors only at the start, so "FR123" would pass "[A-Z]{2}").
+        mask_invalid = ~series.astype(str).apply(lambda v: pattern.fullmatch(v) is not None)
     elif min_val is not None or max_val is not None:
         lo = min_val if min_val is not None else float("-inf")
         hi = max_val if max_val is not None else float("inf")

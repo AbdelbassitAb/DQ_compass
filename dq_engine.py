@@ -391,6 +391,15 @@ class DQEngine:
 # --------------------------------------------------------------------------
 # Independent verification (section 7.3 / Appendix B.3)
 # --------------------------------------------------------------------------
+def _read_snapshot(path) -> pd.DataFrame:
+    """Read a dataset snapshot the SAME way the engine reads a CSV source
+    (connectors.CsvConnector uses engine='python', which parses the whole file
+    at once). The default C parser chunks with low_memory and can infer a
+    different dtype for a mixed-type column, which would make an otherwise
+    reproducible run fail verification on the exception count."""
+    return pd.read_csv(path, engine="python")
+
+
 def verify_run(evidence_dir, run_id: str) -> dict:
     """Re-execute the stored rule configuration of a past run against its stored
     dataset snapshots and assert that status + exception counts still match.
@@ -419,13 +428,13 @@ def verify_run(evidence_dir, run_id: str) -> dict:
                            "match": False, "note": "control function or dataset snapshot missing"})
             continue
 
-        df = pd.read_csv(ds_snap)
+        df = _read_snapshot(ds_snap)
         kwargs = dict(snap.get("params") or {})
         ref = snap.get("ref_dataset_scope")
         if ref and str(ref) not in ("", "nan", "None", "NaN"):
             ref_snap = snap_dir / f"{ref}.csv"
             if ref_snap.exists():
-                kwargs["ref_df"] = pd.read_csv(ref_snap)
+                kwargs["ref_df"] = _read_snapshot(ref_snap)
         try:
             outcome = fn(df, **kwargs)
         except Exception as exc:

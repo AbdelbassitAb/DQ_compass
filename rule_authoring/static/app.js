@@ -98,21 +98,35 @@
     });
   });
 
-  // --- reporting audience filter ---------------------------------
-  var audToggle = document.getElementById("audToggle");
-  if (audToggle) {
-    var main = document.querySelector(".content");
-    audToggle.querySelectorAll("[data-aud-set]").forEach(function (chip) {
-      chip.addEventListener("click", function () {
-        var v = chip.getAttribute("data-aud-set");
-        audToggle.querySelectorAll("[data-aud-set]").forEach(function (c) {
-          c.classList.toggle("on", c === chip);
-        });
-        if (v === "all") main.removeAttribute("data-aud-view");
-        else main.setAttribute("data-aud-view", v);
+  // --- list sorting (run detail control results, generic) ---------
+  document.querySelectorAll("[data-sort-select]").forEach(function (sel) {
+    var root = sel.closest("[data-filter-root]") || document;
+    var rows = root.querySelector(".rows");
+    if (!rows) return;
+    var sevRank = { High: 0, Medium: 1, Low: 2 };
+    var stRank = { FAIL: 0, ERROR: 1, PASS: 2 };
+    var pairs = [];
+    root.querySelectorAll("[data-item]").forEach(function (item, i) {
+      var d = item.nextElementSibling;
+      pairs.push({ item: item, detail: (d && d.hasAttribute("data-detail")) ? d : null, i: i });
+    });
+    function rank(map, v) { return (v in map) ? map[v] : 9; }
+    sel.addEventListener("change", function () {
+      var m = sel.value;
+      pairs.slice().sort(function (a, b) {
+        var A = a.item.dataset, B = b.item.dataset;
+        if (m === "sev") return rank(sevRank, A.sev) - rank(sevRank, B.sev) || a.i - b.i;
+        if (m === "status") return rank(stRank, A.st) - rank(stRank, B.st) || a.i - b.i;
+        if (m === "triage")
+          return (rank(stRank, A.st) - rank(stRank, B.st)) ||
+                 (rank(sevRank, A.sev) - rank(sevRank, B.sev)) || a.i - b.i;
+        return a.i - b.i;
+      }).forEach(function (p) {
+        rows.appendChild(p.item);
+        if (p.detail) rows.appendChild(p.detail);
       });
     });
-  }
+  });
 
   // --- expandable rows ---------------------------------------------
   document.querySelectorAll("[data-expand]").forEach(function (el) {

@@ -152,6 +152,72 @@ def list_runs() -> list:
     return list(reversed(out))
 
 
+# Generic "how to fix" advice per dimension, used when the catalogue rule has no
+# remediation_action of its own. Kept short and plain.
+_FIX_HINTS = {
+    "Completeness": "Populate the missing values at the source, or make the field "
+                    "mandatory in the feeding system. If a blank is legitimate, add a "
+                    "tolerance threshold to the rule.",
+    "Validity": "Correct the offending values at the source, or — if they are "
+                "legitimate — extend the rule's allowed list / pattern / range so it "
+                "recognises them.",
+    "Uniqueness": "De-duplicate the records at the source and investigate why the key "
+                  "repeats. If the key is meant to be composite, add the missing "
+                  "column(s) to the rule.",
+    "Consistency": "Load the missing reference records, fix the mismatched key, or "
+                   "re-sync the reference dataset before this feed runs.",
+    "Timeliness": "Investigate the delay in the upstream feed. If the lag is expected, "
+                  "raise max_lag_days or change the rule's reference date.",
+    "Reconciliation": "Escalate the gap to the owning team; check for missing rows on "
+                      "either side and unit/scale differences. Widen tolerance_pct only "
+                      "if the residual difference is genuinely acceptable.",
+}
+
+
+def _exception_focus(control_type: str, params: dict) -> list:
+    """The column(s) the rule actually tests — shown first and highlighted in the
+    exception table so the failing values are obvious in a wide dataset."""
+    p = params or {}
+    cols = []
+    for k in ("field", "key"):
+        if p.get(k):
+            cols.append(str(p[k]))
+    for k in p.get("keys", []) or []:
+        cols.append(str(k))
+    if p.get("ref_field") and str(p["ref_field"]) not in cols:
+        cols.append(str(p["ref_field"]))
+    # engine-added helper columns on the exception frame
+    cols += [c for c in ("lag_days", "delta", "delta_pct", "_merge",
+                         "_source_value", "_target_value") ]
+    return cols
+
+
+def _exception_note(control_type: str, params: dict) -> str:
+    p = params or {}
+    f = p.get("field") or p.get("key") or ", ".join(p.get("keys", []) or []) or "the field"
+    if control_type == "Completeness":
+        return f"Rows where {f} is null or blank."
+    if control_type == "Validity":
+        if p.get("allowed_values"):
+            return f"Rows where {f} is not in the allowed set " \
+                   f"({', '.join(map(str, p['allowed_values']))})."
+        if p.get("regex"):
+            return f"Rows where {f} does not match the pattern {p['regex']!r}."
+        lo, hi = p.get("min_val", "-∞"), p.get("max_val", "+∞")
+        return f"Rows where {f} is outside [{lo}, {hi}]."
+    if control_type == "Uniqueness":
+        return f"Rows that share a duplicated value of ({f})."
+    if control_type == "Consistency":
+        return f"Rows where {f} has no match in {p.get('ref_field', 'the reference')}."
+    if control_type == "Timeliness":
+        return f"Rows where {f} is older than {p.get('max_lag_days', '?')} day(s) " \
+               f"(see lag_days)."
+    if control_type == "Reconciliation":
+        return "Rows missing on one side, or whose value gap exceeds tolerance " \
+               "(see delta_pct)."
+    return "Records that failed the control."
+
+
 def load_run(run_id: str):
     rd = EVIDENCE_DIR / run_id
     sf = rd / "run_summary.json"
@@ -166,19 +232,47 @@ def load_run(run_id: str):
         except ValueError:
             return None
 
+    cat_by_id = {x["rule_id"]: x for x in store.list_rules()}
+    _MAX_OTHER_COLS = 8
+
     for r in summary.get("results", []):
+        cat = cat_by_id.get(r["rule_id"], {})
+        params = (r.get("rule_configuration_snapshot") or {}).get("params") or {}
+        # per-rule "how to fix" advice
+        rem = (cat.get("remediation_action") or "").strip()
+        r["fix_advice"] = rem or _FIX_HINTS.get(r["control_type"], "")
+        r["fix_advice_source"] = "catalogue" if rem else "generic"
+        r["remediation_action"] = rem
+        r["kpi"] = cat.get("kpi", "")
+        r["threshold_text"] = cat.get("threshold", "")
+
         r["exceptions_preview"] = None
         p = r.get("exceptions_evidence_path")
         if p and (rd / p).exists():
             try:
-                edf = pd.read_csv(rd / p)
+                edf = pd.read_csv(rd / p, low_memory=False)
+                all_cols = [str(c) for c in edf.columns]
+                focus = [c for c in _exception_focus(r["control_type"], params)
+                         if c in all_cols]
+                others = [c for c in all_cols if c not in focus]
+                shown = focus + others[:_MAX_OTHER_COLS]
                 r["exceptions_preview"] = {
-                    "columns": [str(c) for c in edf.columns],
-                    "rows": edf.head(25).astype(str).to_dict("records"),
-                    "total": len(edf),
+                    "columns": shown,
+                    "focus": focus,
+                    "rows": edf[shown].head(25).astype(str).to_dict("records"),
+                    "total": int(len(edf)),
+                    "more_cols": max(0, len(others) - _MAX_OTHER_COLS),
+                    "note": _exception_note(r["control_type"], params),
+                    "download": p,
                 }
-            except Exception:
-                pass
+            except Exception as exc:  # never let a preview problem hide the failure
+                app.logger.warning("exception preview failed for %s: %r", r["rule_id"], exc)
+                r["exceptions_preview"] = {
+                    "columns": [], "focus": [], "rows": [],
+                    "total": r.get("exception_count", 0), "more_cols": 0,
+                    "note": _exception_note(r["control_type"], params),
+                    "download": p, "unavailable": True,
+                }
 
     counts = {"PASS": 0, "FAIL": 0, "ERROR": 0}
     for r in summary.get("results", []):
@@ -680,12 +774,22 @@ def download_run_file(run_id, name):
     return send_file(p, as_attachment=True, download_name=Path(name).name)
 
 
-def reporting_context():
-    """Assemble everything the Reporting page needs from the evidence runs."""
+def reporting_context(focus_run_id: str | None = None):
+    """Assemble everything the Reporting page needs from the evidence runs.
+
+    Every panel except the trend chart and the rule-reliability table is computed
+    for ONE run -- the most recent by default, or `focus_run_id` when the user
+    picks another from the run selector. The trend / reliability window is that
+    run plus the 11 older ones; "previous run" is the run immediately before it.
+    """
     runs = [r for r in list_runs() if r.get("exists")]
     if not runs:
         return None
-    latest, prev = runs[0], (runs[1] if len(runs) > 1 else None)
+    focus_idx = 0
+    if focus_run_id:
+        focus_idx = next((i for i, r in enumerate(runs) if r["run_id"] == focus_run_id), 0)
+    latest = runs[focus_idx]
+    prev = runs[focus_idx + 1] if focus_idx + 1 < len(runs) else None
     ld = EVIDENCE_DIR / latest["run_id"]
     pd_ = EVIDENCE_DIR / prev["run_id"] if prev else None
 
@@ -693,12 +797,11 @@ def reporting_context():
     delta = round(score - overall_dq_score(pd_), 1) if pd_ else None
 
     latest_map = run_result_map(ld)
-    prev_map = run_result_map(pd_) if pd_ else {}
     n_rules = len(latest_map)
     n_pass = sum(1 for r in latest_map.values() if r["status"] == "PASS")
     total_exc = sum(r["exception_count"] for r in latest_map.values())
 
-    window = runs[:12]
+    window = runs[focus_idx:focus_idx + 12]
     trend = []
     for m in reversed(window):
         d = EVIDENCE_DIR / m["run_id"]
@@ -707,49 +810,10 @@ def reporting_context():
                       "pass": c.get("PASS", 0), "fail": c.get("FAIL", 0), "error": c.get("ERROR", 0),
                       "score": overall_dq_score(d)})
 
-    # what changed vs previous run
-    changed = []
-    for rid, cur in latest_map.items():
-        p = prev_map.get(rid)
-        if not p:
-            continue
-        if p["status"] != cur["status"]:
-            changed.append({"rule_id": rid, "name": cur["control_name"], "kind": "flip",
-                            "frm": p["status"], "to": cur["status"],
-                            "improved": cur["status"] == "PASS"})
-        elif cur["status"] == "FAIL" and p["status"] == "FAIL" and \
-                cur["exception_count"] != p["exception_count"]:
-            dlt = cur["exception_count"] - p["exception_count"]
-            changed.append({"rule_id": rid, "name": cur["control_name"], "kind": "delta",
-                            "exc_delta": dlt, "improved": dlt < 0})
-
-    # rule reliability over the window
-    rel = {}
-    for m in window:
-        for rid, r in run_result_map(EVIDENCE_DIR / m["run_id"]).items():
-            b = rel.setdefault(rid, {"rule_id": rid, "name": r["control_name"],
-                                     "type": r["control_type"], "severity": r["severity"],
-                                     "runs": 0, "fail": 0, "error": 0, "last": r["status"]})
-            b["runs"] += 1
-            if r["status"] == "FAIL":
-                b["fail"] += 1
-            elif r["status"] == "ERROR":
-                b["error"] += 1
-    for rid, b in rel.items():
-        b["last"] = latest_map.get(rid, {}).get("status", b["last"])
-    reliability = sorted(rel.values(),
-                         key=lambda x: (x["fail"] + x["error"]) / max(1, x["runs"]), reverse=True)
-
-    error_rules = [{"rule_id": rid, **r} for rid, r in latest_map.items() if r["status"] == "ERROR"]
-
+    # exceptions grouped by owner (accountability) -- business audience
     exc = report_exception_summary(ld).to_dict("records")
-    by_dim = sorted((e for e in exc if e["dimension"] == "control_type"),
-                    key=lambda e: -e["total_exceptions"])
     by_owner = sorted((e for e in exc if e["dimension"] == "owner"),
                       key=lambda e: -e["total_exceptions"])
-    by_rule = sorted(({"key": rid, "total_exceptions": r["exception_count"]}
-                      for rid, r in latest_map.items() if r["exception_count"]),
-                     key=lambda e: -e["total_exceptions"])[:8]
 
     # 3-state coverage (controlled+passing / controlled+failing / not controlled)
     grid = build_coverage(store.list_rules(), sources_index())
@@ -774,6 +838,7 @@ def reporting_context():
 
     return dict(
         latest=latest, prev=prev,
+        runs=runs, focus_id=latest["run_id"], is_latest=(focus_idx == 0),
         score=score, delta=delta,
         pass_rate=round(100 * n_pass / n_rules, 1) if n_rules else 0.0,
         n_rules=n_rules, n_pass=n_pass, n_fail=latest["counts"].get("FAIL", 0),
@@ -782,15 +847,15 @@ def reporting_context():
         ds_scores=report_dataset_score(ld).to_dict("records"),
         cov3=cov3, covered=covered, datasets_total=len(cov3),
         control_types=schema.CONTROL_TYPES,
-        trend=trend, changed=changed, reliability=reliability[:12], error_rules=error_rules,
-        by_dim=by_dim, by_owner=by_owner, by_rule=by_rule,
+        trend=trend, by_owner=by_owner,
         score_series=[t["score"] for t in trend],
     )
 
 
 @app.route("/reporting")
 def reporting():
-    return render_template("reporting.html", ctx=reporting_context(), charts=charts,
+    return render_template("reporting.html",
+                           ctx=reporting_context(request.args.get("run")), charts=charts,
                            active_nav="reporting", user=current_user())
 
 

@@ -31,10 +31,26 @@ CATALOGUE_CSV = ROOT / "control_catalogue.csv"
 SEVERITY_WEIGHT = {"High": 5, "Medium": 2, "Low": 1}
 
 
+def _run_started_at(run_dir: Path) -> str:
+    """Recorded run timestamp (ISO). Falls back to directory mtime as a string
+    so ordering still works if the summary is unreadable."""
+    try:
+        with open(run_dir / "run_summary.json") as f:
+            ts = json.load(f).get("run_timestamp_utc")
+        if ts:
+            return str(ts)
+    except (OSError, ValueError):
+        pass
+    return f"~{run_dir.stat().st_mtime:018.0f}"
+
+
 def _latest_run_dir() -> Path:
+    # Order by the run's OWN recorded timestamp, not the directory mtime: writing
+    # verification.json / signoff.json into a past run touches its mtime and would
+    # otherwise make it look like the newest run.
     runs = sorted(
         (p for p in EVIDENCE_DIR.iterdir() if p.is_dir() and (p / "run_summary.json").exists()),
-        key=lambda p: p.stat().st_mtime,
+        key=_run_started_at,
     )
     if not runs:
         raise SystemExit("No run found in evidence/. Run 'python dq_engine.py' first.")

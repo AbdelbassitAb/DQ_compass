@@ -65,10 +65,18 @@
           <button class="fchip" data-group="st" data-filter-chip="PASS">Passing</button>
           <button class="fchip" data-group="st" data-filter-chip="ERROR">Errors</button>
         </div>
+        <label class="sortsel">{{ ui.icon('sort') }}
+          <select data-sort-select aria-label="Sort control results">
+            <option value="">Catalogue order</option>
+            <option value="triage">Failing &amp; High first</option>
+            <option value="status">Status (fail → pass)</option>
+            <option value="sev">Severity (High → Low)</option>
+          </select>
+        </label>
       </div>
       <div class="rows">
         {% for r in summary.results %}
-        <div class="row-item" data-item data-expand data-st="{{ r.status }}"
+        <div class="row-item" data-item data-expand data-st="{{ r.status }}" data-sev="{{ r.severity }}"
              data-search="{{ r.rule_id }} {{ r.control_name }} {{ r.control_type }}">
           {{ ui.status_dot(r.status) }}
           <div class="row-main">
@@ -88,17 +96,41 @@
         <div class="row-detail" data-detail>
           <div class="row-detail-inner">
             {% if r.error %}<div class="issue err">{{ ui.icon('alert') }}<span>{{ r.error }}</span></div>{% endif %}
+
+            {% if r.fix_advice and r.status != 'PASS' %}
+            <div class="fix-advice">
+              <div class="fix-advice-head">{{ ui.icon('info') }} How to fix
+                <span class="muted small">{{ 'from catalogue · remediation_action' if r.fix_advice_source == 'catalogue' else 'generic guidance for a ' ~ r.control_type ~ ' control' }}</span>
+              </div>
+              <p>{{ r.fix_advice }}</p>
+            </div>
+            {% endif %}
+
             <div class="kv-grid">
               <div><b>Metrics</b><pre>{{ r.metrics | tojson(indent=2) }}</pre></div>
               <div><b>Config snapshot</b><pre>{{ r.rule_configuration_snapshot | tojson(indent=2) }}</pre></div>
               <div><b>Execution parameters</b><pre>{{ r.execution_parameters | tojson(indent=2) }}</pre></div>
             </div>
+
             {% if r.exceptions_preview %}
-            <p class="small" style="margin:10px 0 4px"><b>Exception records</b> — showing {{ r.exceptions_preview.rows|length }} of {{ r.exceptions_preview.total }}</p>
-            <div class="scroll-x"><table class="preview-table">
-              <tr>{% for c in r.exceptions_preview.columns %}<th>{{ c }}</th>{% endfor %}</tr>
-              {% for row in r.exceptions_preview.rows %}<tr>{% for c in r.exceptions_preview.columns %}<td>{{ row[c] }}</td>{% endfor %}</tr>{% endfor %}
-            </table></div>
+            {% set xp = r.exceptions_preview %}
+            <p class="small" style="margin:12px 0 2px">
+              <b>Exception records</b> — {{ xp.total }} failing row{{ 's' if xp.total != 1 else '' }}
+              {% if not xp.unavailable %}· showing {{ xp.rows|length }}{% endif %}
+              {% if xp.download %}· <a href="{{ url_for('download_run_file', run_id=run_id, name=xp.download) }}">{{ ui.icon('download') }} full CSV</a>{% endif %}
+            </p>
+            <p class="muted small" style="margin:0 0 6px">{{ xp.note }}{% if xp.focus %} · highlighted column{{ 's' if xp.focus|length != 1 else '' }}: {% for c in xp.focus %}<code>{{ c }}</code> {% endfor %}{% endif %}</p>
+            {% if xp.unavailable %}
+              <div class="issue wrn">{{ ui.icon('alert') }}<span>Preview could not be rendered here — download the full CSV above.</span></div>
+            {% elif xp.rows %}
+              <div class="scroll-x"><table class="preview-table">
+                <tr>{% for c in xp.columns %}<th class="{{ 'xf' if c in xp.focus else '' }}">{{ c }}</th>{% endfor %}</tr>
+                {% for row in xp.rows %}<tr>{% for c in xp.columns %}<td class="{{ 'xf' if c in xp.focus else '' }}">{{ row[c] }}</td>{% endfor %}</tr>{% endfor %}
+              </table></div>
+              {% if xp.more_cols %}<p class="muted small" style="margin:4px 0 0">+ {{ xp.more_cols }} more column{{ 's' if xp.more_cols != 1 else '' }} in the full CSV.</p>{% endif %}
+            {% endif %}
+            {% elif r.exception_count %}
+            <p class="small" style="margin:12px 0 2px"><b>Exception records</b> — {{ r.exception_count }} failing rows, but the evidence file is missing.</p>
             {% endif %}
           </div>
         </div>
