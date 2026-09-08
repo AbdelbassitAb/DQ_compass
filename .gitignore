@@ -1,24 +1,7 @@
-# --- Python ---
+# Python build noise only - regenerated automatically, never needed for a demo.
 __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
 build/
 dist/
-
-# --- generated at runtime (regenerate with the CLI) ---
-# `dqcompass run`    -> Evidence Packs + runs_ledger.jsonl
-evidence/
-# `dqcompass report` -> scorecards, coverage, trend, ...
-reporting/*.csv
-reporting/*.html
-reporting/alerts.json
-reporting/supervisory_mapping.csv
-
-# --- audit logs written by the web app ---
-catalogue_changelog.jsonl
-data_sources_changelog.jsonl
-
-# --- one-time migration backups ---
-*.backup.csv
-*.backup.yaml

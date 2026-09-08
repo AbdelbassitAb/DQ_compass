@@ -1,0 +1,38 @@
+{
+  "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+  "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+  "rule_id": "TIM_FAIL",
+  "control_name": "Feed refreshed within 7 days",
+  "control_type": "Timeliness",
+  "control_function": "check_timeliness",
+  "severity": "High",
+  "owner": "Data Steward Markets",
+  "dataset_reference": {
+    "feed_status": "f49ec86a8f9ccfa4"
+  },
+  "rule_configuration_snapshot": {
+    "dataset_scope": "feed_status",
+    "ref_dataset_scope": null,
+    "params": {
+      "field": "last_updated",
+      "max_lag_days": 7,
+      "reference_date": "today"
+    },
+    "threshold_pct": null
+  },
+  "execution_parameters": {
+    "field": "last_updated",
+    "max_lag_days": 7,
+    "reference_date": "today",
+    "threshold_pct": null,
+    "reference_date_resolved": "2026-09-08"
+  },
+  "status": "FAIL",
+  "metrics": {
+    "total_records": 10,
+    "sla_breach_count": 5,
+    "within_sla_pct": 50.0
+  },
+  "exception_count": 5,
+  "exceptions_evidence_path": "TIM_FAIL_exceptions.csv"
+}

@@ -1,0 +1,35 @@
+{
+  "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+  "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+  "rule_id": "VAL_REGEX_PASS",
+  "control_name": "Series key format",
+  "control_type": "Validity",
+  "control_function": "check_validity",
+  "severity": "Low",
+  "owner": "Data Owner EUC",
+  "dataset_reference": {
+    "finance_data": "83d161d2e6af0c02"
+  },
+  "rule_configuration_snapshot": {
+    "dataset_scope": "finance_data",
+    "ref_dataset_scope": null,
+    "params": {
+      "field": "Series",
+      "regex": "^[A-Z0-9:]+$"
+    },
+    "threshold_pct": null
+  },
+  "execution_parameters": {
+    "field": "Series",
+    "regex": "^[A-Z0-9:]+$",
+    "threshold_pct": null
+  },
+  "status": "PASS",
+  "metrics": {
+    "total_records": 77992,
+    "invalid_count": 0,
+    "valid_pct": 100.0
+  },
+  "exception_count": 0,
+  "exceptions_evidence_path": null
+}

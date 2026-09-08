@@ -1,0 +1,586 @@
+{
+  "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+  "run_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+  "engine_version": "1.0",
+  "catalogue_source": "control_catalogue.csv",
+  "catalogue_version_hash": "68887c88a7fde846",
+  "datasets_config_hash": "49cce36776a64ed1",
+  "rules_executed": 14,
+  "dataset_snapshots": [
+    "feed_status.csv",
+    "finance_data.csv",
+    "recon_euc_positions.csv",
+    "recon_gl_break.csv",
+    "recon_gl_match.csv",
+    "ref_dimension_codes.csv"
+  ],
+  "results": [
+    {
+      "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+      "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+      "rule_id": "CMP_PASS",
+      "control_name": "Risk category always populated",
+      "control_type": "Completeness",
+      "control_function": "check_completeness",
+      "severity": "High",
+      "owner": "Data Steward Markets",
+      "dataset_reference": {
+        "finance_data": "83d161d2e6af0c02"
+      },
+      "rule_configuration_snapshot": {
+        "dataset_scope": "finance_data",
+        "ref_dataset_scope": null,
+        "params": {
+          "field": "DER_RISK"
+        },
+        "threshold_pct": null
+      },
+      "execution_parameters": {
+        "field": "DER_RISK",
+        "threshold_pct": null
+      },
+      "status": "PASS",
+      "metrics": {
+        "total_records": 77992,
+        "null_count": 0,
+        "completeness_pct": 100.0
+      },
+      "exception_count": 0,
+      "exceptions_evidence_path": null
+    },
+    {
+      "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+      "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+      "rule_id": "CMP_FAIL",
+      "control_name": "2013 turnover value populated",
+      "control_type": "Completeness",
+      "control_function": "check_completeness",
+      "severity": "Medium",
+      "owner": "Data Owner EUC",
+      "dataset_reference": {
+        "finance_data": "83d161d2e6af0c02"
+      },
+      "rule_configuration_snapshot": {
+        "dataset_scope": "finance_data",
+        "ref_dataset_scope": null,
+        "params": {
+          "field": "2013"
+        },
+        "threshold_pct": null
+      },
+      "execution_parameters": {
+        "field": "2013",
+        "threshold_pct": null
+      },
+      "status": "FAIL",
+      "metrics": {
+        "total_records": 77992,
+        "null_count": 17708,
+        "completeness_pct": 77.3
+      },
+      "exception_count": 17708,
+      "exceptions_evidence_path": "CMP_FAIL_exceptions.csv"
+    },
+    {
+      "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+      "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+      "rule_id": "CMP_THRESHOLD_PASS",
+      "control_name": "2019 turnover value populated (<=30% gap tolerated)",
+      "control_type": "Completeness",
+      "control_function": "check_completeness",
+      "severity": "Low",
+      "owner": "Data Owner EUC",
+      "dataset_reference": {
+        "finance_data": "83d161d2e6af0c02"
+      },
+      "rule_configuration_snapshot": {
+        "dataset_scope": "finance_data",
+        "ref_dataset_scope": null,
+        "params": {
+          "field": "2019"
+        },
+        "threshold_pct": 30.0
+      },
+      "execution_parameters": {
+        "field": "2019",
+        "threshold_pct": 30.0
+      },
+      "status": "PASS",
+      "metrics": {
+        "total_records": 77992,
+        "null_count": 19969,
+        "completeness_pct": 74.4,
+        "exception_pct": 25.6,
+        "threshold_pct": 30.0,
+        "within_threshold": true
+      },
+      "exception_count": 19969,
+      "exceptions_evidence_path": "CMP_THRESHOLD_PASS_exceptions.csv"
+    },
+    {
+      "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+      "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+      "rule_id": "VAL_LIST_PASS",
+      "control_name": "Counterparty country code is known",
+      "control_type": "Validity",
+      "control_function": "check_validity",
+      "severity": "Medium",
+      "owner": "Data Steward Markets",
+      "dataset_reference": {
+        "finance_data": "83d161d2e6af0c02"
+      },
+      "rule_configuration_snapshot": {
+        "dataset_scope": "finance_data",
+        "ref_dataset_scope": null,
+        "params": {
+          "field": "DER_CPC",
+          "allowed_values": [
+            "1E",
+            "5J",
+            "5Z"
+          ]
+        },
+        "threshold_pct": null
+      },
+      "execution_parameters": {
+        "field": "DER_CPC",
+        "allowed_values": [
+          "1E",
+          "5J",
+          "5Z"
+        ],
+        "threshold_pct": null
+      },
+      "status": "PASS",
+      "metrics": {
+        "total_records": 77992,
+        "invalid_count": 0,
+        "valid_pct": 100.0
+      },
+      "exception_count": 0,
+      "exceptions_evidence_path": null
+    },
+    {
+      "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+      "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+      "rule_id": "VAL_LIST_FAIL",
+      "control_name": "Counterparty sector is an accepted code",
+      "control_type": "Validity",
+      "control_function": "check_validity",
+      "severity": "High",
+      "owner": "Control Owner",
+      "dataset_reference": {
+        "finance_data": "83d161d2e6af0c02"
+      },
+      "rule_configuration_snapshot": {
+        "dataset_scope": "finance_data",
+        "ref_dataset_scope": null,
+        "params": {
+          "field": "DER_SECTOR_CPY",
+          "allowed_values": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "P",
+            "U",
+            "V",
+            "W"
+          ]
+        },
+        "threshold_pct": null
+      },
+      "execution_parameters": {
+        "field": "DER_SECTOR_CPY",
+        "allowed_values": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "P",
+          "U",
+          "V",
+          "W"
+        ],
+        "threshold_pct": null
+      },
+      "status": "FAIL",
+      "metrics": {
+        "total_records": 77992,
+        "invalid_count": 2,
+        "valid_pct": 100.0
+      },
+      "exception_count": 2,
+      "exceptions_evidence_path": "VAL_LIST_FAIL_exceptions.csv"
+    },
+    {
+      "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+      "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+      "rule_id": "VAL_REGEX_PASS",
+      "control_name": "Series key format",
+      "control_type": "Validity",
+      "control_function": "check_validity",
+      "severity": "Low",
+      "owner": "Data Owner EUC",
+      "dataset_reference": {
+        "finance_data": "83d161d2e6af0c02"
+      },
+      "rule_configuration_snapshot": {
+        "dataset_scope": "finance_data",
+        "ref_dataset_scope": null,
+        "params": {
+          "field": "Series",
+          "regex": "^[A-Z0-9:]+$"
+        },
+        "threshold_pct": null
+      },
+      "execution_parameters": {
+        "field": "Series",
+        "regex": "^[A-Z0-9:]+$",
+        "threshold_pct": null
+      },
+      "status": "PASS",
+      "metrics": {
+        "total_records": 77992,
+        "invalid_count": 0,
+        "valid_pct": 100.0
+      },
+      "exception_count": 0,
+      "exceptions_evidence_path": null
+    },
+    {
+      "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+      "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+      "rule_id": "UNQ_PASS",
+      "control_name": "Series identifier is unique",
+      "control_type": "Uniqueness",
+      "control_function": "check_uniqueness",
+      "severity": "High",
+      "owner": "Data Owner EUC",
+      "dataset_reference": {
+        "finance_data": "83d161d2e6af0c02"
+      },
+      "rule_configuration_snapshot": {
+        "dataset_scope": "finance_data",
+        "ref_dataset_scope": null,
+        "params": {
+          "keys": [
+            "Series"
+          ]
+        },
+        "threshold_pct": null
+      },
+      "execution_parameters": {
+        "keys": [
+          "Series"
+        ],
+        "threshold_pct": null
+      },
+      "status": "PASS",
+      "metrics": {
+        "total_records": 77992,
+        "duplicate_count": 0,
+        "duplicate_pct": 0.0
+      },
+      "exception_count": 0,
+      "exceptions_evidence_path": null
+    },
+    {
+      "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+      "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+      "rule_id": "UNQ_FAIL",
+      "control_name": "One row per business dimension combination",
+      "control_type": "Uniqueness",
+      "control_function": "check_uniqueness",
+      "severity": "Medium",
+      "owner": "Control Owner",
+      "dataset_reference": {
+        "finance_data": "83d161d2e6af0c02"
+      },
+      "rule_configuration_snapshot": {
+        "dataset_scope": "finance_data",
+        "ref_dataset_scope": null,
+        "params": {
+          "keys": [
+            "DER_REP_CTY",
+            "DER_INSTR",
+            "DER_RISK",
+            "DER_SECTOR_CPY",
+            "DER_CURR_LEG1",
+            "DER_CURR_LEG2",
+            "DER_ISSUE_MAT",
+            "DER_RATING",
+            "DER_EX_METHOD",
+            "DER_BASIS"
+          ]
+        },
+        "threshold_pct": null
+      },
+      "execution_parameters": {
+        "keys": [
+          "DER_REP_CTY",
+          "DER_INSTR",
+          "DER_RISK",
+          "DER_SECTOR_CPY",
+          "DER_CURR_LEG1",
+          "DER_CURR_LEG2",
+          "DER_ISSUE_MAT",
+          "DER_RATING",
+          "DER_EX_METHOD",
+          "DER_BASIS"
+        ],
+        "threshold_pct": null
+      },
+      "status": "FAIL",
+      "metrics": {
+        "total_records": 77992,
+        "duplicate_count": 27290,
+        "duplicate_pct": 34.99
+      },
+      "exception_count": 27290,
+      "exceptions_evidence_path": "UNQ_FAIL_exceptions.csv"
+    },
+    {
+      "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+      "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+      "rule_id": "CON_PASS",
+      "control_name": "Counterparty sector exists in the code table",
+      "control_type": "Consistency",
+      "control_function": "check_consistency",
+      "severity": "Medium",
+      "owner": "Data Steward Reference",
+      "dataset_reference": {
+        "finance_data": "83d161d2e6af0c02",
+        "ref_dimension_codes": "8da5a424d05d45e4"
+      },
+      "rule_configuration_snapshot": {
+        "dataset_scope": "finance_data",
+        "ref_dataset_scope": "ref_dimension_codes",
+        "params": {
+          "field": "DER_SECTOR_CPY",
+          "ref_field": "sector_code"
+        },
+        "threshold_pct": null
+      },
+      "execution_parameters": {
+        "field": "DER_SECTOR_CPY",
+        "ref_field": "sector_code",
+        "threshold_pct": null
+      },
+      "status": "PASS",
+      "metrics": {
+        "total_records": 77992,
+        "orphan_count": 0,
+        "orphan_pct": 0.0
+      },
+      "exception_count": 0,
+      "exceptions_evidence_path": null
+    },
+    {
+      "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+      "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+      "rule_id": "CON_FAIL",
+      "control_name": "Counterparty country exists in the code table",
+      "control_type": "Consistency",
+      "control_function": "check_consistency",
+      "severity": "High",
+      "owner": "Data Steward Reference",
+      "dataset_reference": {
+        "finance_data": "83d161d2e6af0c02",
+        "ref_dimension_codes": "8da5a424d05d45e4"
+      },
+      "rule_configuration_snapshot": {
+        "dataset_scope": "finance_data",
+        "ref_dataset_scope": "ref_dimension_codes",
+        "params": {
+          "field": "DER_CPC",
+          "ref_field": "cpc_code"
+        },
+        "threshold_pct": null
+      },
+      "execution_parameters": {
+        "field": "DER_CPC",
+        "ref_field": "cpc_code",
+        "threshold_pct": null
+      },
+      "status": "FAIL",
+      "metrics": {
+        "total_records": 77992,
+        "orphan_count": 8997,
+        "orphan_pct": 11.54
+      },
+      "exception_count": 8997,
+      "exceptions_evidence_path": "CON_FAIL_exceptions.csv"
+    },
+    {
+      "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+      "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+      "rule_id": "TIM_PASS",
+      "control_name": "Feed refreshed within 10 years",
+      "control_type": "Timeliness",
+      "control_function": "check_timeliness",
+      "severity": "Low",
+      "owner": "Control Owner",
+      "dataset_reference": {
+        "feed_status": "f49ec86a8f9ccfa4"
+      },
+      "rule_configuration_snapshot": {
+        "dataset_scope": "feed_status",
+        "ref_dataset_scope": null,
+        "params": {
+          "field": "last_updated",
+          "max_lag_days": 3650,
+          "reference_date": "today"
+        },
+        "threshold_pct": null
+      },
+      "execution_parameters": {
+        "field": "last_updated",
+        "max_lag_days": 3650,
+        "reference_date": "today",
+        "threshold_pct": null,
+        "reference_date_resolved": "2026-09-08"
+      },
+      "status": "PASS",
+      "metrics": {
+        "total_records": 10,
+        "sla_breach_count": 0,
+        "within_sla_pct": 100.0
+      },
+      "exception_count": 0,
+      "exceptions_evidence_path": null
+    },
+    {
+      "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+      "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+      "rule_id": "TIM_FAIL",
+      "control_name": "Feed refreshed within 7 days",
+      "control_type": "Timeliness",
+      "control_function": "check_timeliness",
+      "severity": "High",
+      "owner": "Data Steward Markets",
+      "dataset_reference": {
+        "feed_status": "f49ec86a8f9ccfa4"
+      },
+      "rule_configuration_snapshot": {
+        "dataset_scope": "feed_status",
+        "ref_dataset_scope": null,
+        "params": {
+          "field": "last_updated",
+          "max_lag_days": 7,
+          "reference_date": "today"
+        },
+        "threshold_pct": null
+      },
+      "execution_parameters": {
+        "field": "last_updated",
+        "max_lag_days": 7,
+        "reference_date": "today",
+        "threshold_pct": null,
+        "reference_date_resolved": "2026-09-08"
+      },
+      "status": "FAIL",
+      "metrics": {
+        "total_records": 10,
+        "sla_breach_count": 5,
+        "within_sla_pct": 50.0
+      },
+      "exception_count": 5,
+      "exceptions_evidence_path": "TIM_FAIL_exceptions.csv"
+    },
+    {
+      "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+      "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+      "rule_id": "REC_PASS",
+      "control_name": "EUC positions tie to the ledger",
+      "control_type": "Reconciliation",
+      "control_function": "check_reconciliation",
+      "severity": "High",
+      "owner": "Finance Control",
+      "dataset_reference": {
+        "recon_euc_positions": "680ca0d3ecbbbbbc",
+        "recon_gl_match": "bc8167ae33b6ad30"
+      },
+      "rule_configuration_snapshot": {
+        "dataset_scope": "recon_euc_positions",
+        "ref_dataset_scope": "recon_gl_match",
+        "params": {
+          "key": "deal_id",
+          "field": "amount",
+          "ref_field": "amount",
+          "tolerance_pct": 1
+        },
+        "threshold_pct": null
+      },
+      "execution_parameters": {
+        "key": "deal_id",
+        "field": "amount",
+        "ref_field": "amount",
+        "tolerance_pct": 1,
+        "threshold_pct": null
+      },
+      "status": "PASS",
+      "metrics": {
+        "total_records": 12,
+        "break_count": 0,
+        "reconciled_pct": 100.0
+      },
+      "exception_count": 0,
+      "exceptions_evidence_path": null
+    },
+    {
+      "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+      "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+      "rule_id": "REC_FAIL",
+      "control_name": "EUC positions tie to the ledger (stressed feed)",
+      "control_type": "Reconciliation",
+      "control_function": "check_reconciliation",
+      "severity": "High",
+      "owner": "Finance Control",
+      "dataset_reference": {
+        "recon_euc_positions": "680ca0d3ecbbbbbc",
+        "recon_gl_break": "949b852208ac446b"
+      },
+      "rule_configuration_snapshot": {
+        "dataset_scope": "recon_euc_positions",
+        "ref_dataset_scope": "recon_gl_break",
+        "params": {
+          "key": "deal_id",
+          "field": "amount",
+          "ref_field": "amount",
+          "tolerance_pct": 1
+        },
+        "threshold_pct": null
+      },
+      "execution_parameters": {
+        "key": "deal_id",
+        "field": "amount",
+        "ref_field": "amount",
+        "tolerance_pct": 1,
+        "threshold_pct": null
+      },
+      "status": "FAIL",
+      "metrics": {
+        "total_records": 12,
+        "break_count": 4,
+        "reconciled_pct": 66.67
+      },
+      "exception_count": 4,
+      "exceptions_evidence_path": "REC_FAIL_exceptions.csv"
+    }
+  ],
+  "previous_run_hash": "",
+  "run_hash": "9ff826b484d05bb7"
+}

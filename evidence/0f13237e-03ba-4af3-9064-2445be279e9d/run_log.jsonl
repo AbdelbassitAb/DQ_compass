@@ -1,0 +1,37 @@
+{"ts": "2026-09-08T11:17:53.939916+00:00", "event": "run_start", "run_id": "0f13237e-03ba-4af3-9064-2445be279e9d", "engine_version": "1.0", "catalogue": "control_catalogue.csv"}
+{"ts": "2026-09-08T11:17:53.939916+00:00", "event": "rule_start", "rule_id": "CMP_PASS", "control_type": "Completeness"}
+{"ts": "2026-09-08T11:17:59.842588+00:00", "event": "dataset_loaded", "dataset": "finance_data", "rows": 77992, "columns": 73, "hash": "83d161d2e6af0c02", "snapshot": "snapshots/finance_data.csv"}
+{"ts": "2026-09-08T11:17:59.865171+00:00", "event": "rule_done", "rule_id": "CMP_PASS", "status": "PASS", "exceptions": 0}
+{"ts": "2026-09-08T11:17:59.865171+00:00", "event": "rule_start", "rule_id": "CMP_FAIL", "control_type": "Completeness"}
+{"ts": "2026-09-08T11:18:00.615400+00:00", "event": "rule_done", "rule_id": "CMP_FAIL", "status": "FAIL", "exceptions": 17708}
+{"ts": "2026-09-08T11:18:00.615400+00:00", "event": "rule_start", "rule_id": "CMP_THRESHOLD_PASS", "control_type": "Completeness"}
+{"ts": "2026-09-08T11:18:01.543674+00:00", "event": "rule_done", "rule_id": "CMP_THRESHOLD_PASS", "status": "PASS", "exceptions": 19969}
+{"ts": "2026-09-08T11:18:01.546331+00:00", "event": "rule_start", "rule_id": "VAL_LIST_PASS", "control_type": "Validity"}
+{"ts": "2026-09-08T11:18:01.546331+00:00", "event": "rule_done", "rule_id": "VAL_LIST_PASS", "status": "PASS", "exceptions": 0}
+{"ts": "2026-09-08T11:18:01.546331+00:00", "event": "rule_start", "rule_id": "VAL_LIST_FAIL", "control_type": "Validity"}
+{"ts": "2026-09-08T11:18:01.546331+00:00", "event": "rule_done", "rule_id": "VAL_LIST_FAIL", "status": "FAIL", "exceptions": 2}
+{"ts": "2026-09-08T11:18:01.546331+00:00", "event": "rule_start", "rule_id": "VAL_REGEX_PASS", "control_type": "Validity"}
+{"ts": "2026-09-08T11:18:01.624474+00:00", "event": "rule_done", "rule_id": "VAL_REGEX_PASS", "status": "PASS", "exceptions": 0}
+{"ts": "2026-09-08T11:18:01.624474+00:00", "event": "rule_start", "rule_id": "UNQ_PASS", "control_type": "Uniqueness"}
+{"ts": "2026-09-08T11:18:01.640089+00:00", "event": "rule_done", "rule_id": "UNQ_PASS", "status": "PASS", "exceptions": 0}
+{"ts": "2026-09-08T11:18:01.640089+00:00", "event": "rule_start", "rule_id": "UNQ_FAIL", "control_type": "Uniqueness"}
+{"ts": "2026-09-08T11:18:02.952074+00:00", "event": "rule_done", "rule_id": "UNQ_FAIL", "status": "FAIL", "exceptions": 27290}
+{"ts": "2026-09-08T11:18:02.952074+00:00", "event": "rule_start", "rule_id": "CON_PASS", "control_type": "Consistency"}
+{"ts": "2026-09-08T11:18:02.967695+00:00", "event": "dataset_loaded", "dataset": "ref_dimension_codes", "rows": 15, "columns": 2, "hash": "8da5a424d05d45e4", "snapshot": "snapshots/ref_dimension_codes.csv"}
+{"ts": "2026-09-08T11:18:02.967695+00:00", "event": "rule_done", "rule_id": "CON_PASS", "status": "PASS", "exceptions": 0}
+{"ts": "2026-09-08T11:18:02.967695+00:00", "event": "rule_start", "rule_id": "CON_FAIL", "control_type": "Consistency"}
+{"ts": "2026-09-08T11:18:03.353065+00:00", "event": "rule_done", "rule_id": "CON_FAIL", "status": "FAIL", "exceptions": 8997}
+{"ts": "2026-09-08T11:18:03.353065+00:00", "event": "rule_start", "rule_id": "TIM_PASS", "control_type": "Timeliness"}
+{"ts": "2026-09-08T11:18:03.353065+00:00", "event": "dataset_loaded", "dataset": "feed_status", "rows": 10, "columns": 3, "hash": "f49ec86a8f9ccfa4", "snapshot": "snapshots/feed_status.csv"}
+{"ts": "2026-09-08T11:18:03.370099+00:00", "event": "rule_done", "rule_id": "TIM_PASS", "status": "PASS", "exceptions": 0}
+{"ts": "2026-09-08T11:18:03.370099+00:00", "event": "rule_start", "rule_id": "TIM_FAIL", "control_type": "Timeliness"}
+{"ts": "2026-09-08T11:18:03.370099+00:00", "event": "rule_done", "rule_id": "TIM_FAIL", "status": "FAIL", "exceptions": 5}
+{"ts": "2026-09-08T11:18:03.370099+00:00", "event": "rule_start", "rule_id": "REC_PASS", "control_type": "Reconciliation"}
+{"ts": "2026-09-08T11:18:03.370099+00:00", "event": "dataset_loaded", "dataset": "recon_euc_positions", "rows": 12, "columns": 3, "hash": "680ca0d3ecbbbbbc", "snapshot": "snapshots/recon_euc_positions.csv"}
+{"ts": "2026-09-08T11:18:03.385748+00:00", "event": "dataset_loaded", "dataset": "recon_gl_match", "rows": 12, "columns": 2, "hash": "bc8167ae33b6ad30", "snapshot": "snapshots/recon_gl_match.csv"}
+{"ts": "2026-09-08T11:18:03.385748+00:00", "event": "rule_done", "rule_id": "REC_PASS", "status": "PASS", "exceptions": 0}
+{"ts": "2026-09-08T11:18:03.385748+00:00", "event": "rule_start", "rule_id": "REC_FAIL", "control_type": "Reconciliation"}
+{"ts": "2026-09-08T11:18:03.385748+00:00", "event": "dataset_loaded", "dataset": "recon_gl_break", "rows": 11, "columns": 2, "hash": "949b852208ac446b", "snapshot": "snapshots/recon_gl_break.csv"}
+{"ts": "2026-09-08T11:18:03.402217+00:00", "event": "rule_done", "rule_id": "REC_FAIL", "status": "FAIL", "exceptions": 4}
+{"ts": "2026-09-08T11:18:03.989166+00:00", "event": "system_trace_written"}
+{"ts": "2026-09-08T11:18:04.004745+00:00", "event": "run_complete", "rules": 14, "run_hash": "b1c8ba33ffd68f60"}

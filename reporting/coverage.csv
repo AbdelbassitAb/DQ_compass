@@ -1,0 +1,7 @@
+dataset_scope,control_type,rule_ids,n_rules
+feed_status,Timeliness,TIM_FAIL; TIM_PASS,2
+finance_data,Completeness,CMP_FAIL; CMP_PASS; CMP_THRESHOLD_PASS,3
+finance_data,Consistency,CON_FAIL; CON_PASS,2
+finance_data,Uniqueness,UNQ_FAIL; UNQ_PASS,2
+finance_data,Validity,VAL_LIST_FAIL; VAL_LIST_PASS; VAL_REGEX_PASS,3
+recon_euc_positions,Reconciliation,REC_FAIL; REC_PASS,2

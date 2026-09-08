@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>DQ Compass - Scorecard</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;margin:24px;color:#222}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid #ddd;padding:8px;text-align:left;font-size:14px}
+th{background:#111;color:#fff}
+.kpi{display:flex;gap:16px;margin:16px 0}
+.kpi div{padding:12px 20px;border-radius:6px;color:#fff;font-weight:bold}
+</style></head><body>
+<h2>DQ Compass - Data Quality Scorecard</h2>
+<p>Run: 0f13237e-03ba-4af3-9064-2445be279e9d</p>
+<div class="kpi">
+<div style="background:#d73027">RED: 4</div>
+<div style="background:#fdae61">ORANGE: 2</div>
+<div style="background:#1a9850">GREEN: 8</div>
+<div style="background:#6b7280">ERROR: 0</div>
+</div>
+<table><tr><th></th><th>Rule ID</th><th>Control</th><th>Type</th><th>Severity</th>
+<th>Status</th><th>Exceptions</th><th>Owner</th></tr>
+<tr><td><span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:#1a9850'></span></td><td>CMP_PASS</td><td>Risk category always populated</td><td>Completeness</td><td>High</td><td>PASS</td><td>0</td><td>Data Steward Markets</td></tr><tr><td><span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:#fdae61'></span></td><td>CMP_FAIL</td><td>2013 turnover value populated</td><td>Completeness</td><td>Medium</td><td>FAIL</td><td>17708</td><td>Data Owner EUC</td></tr><tr><td><span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:#1a9850'></span></td><td>CMP_THRESHOLD_PASS</td><td>2019 turnover value populated (<=30% gap tolerated)</td><td>Completeness</td><td>Low</td><td>PASS</td><td>19969</td><td>Data Owner EUC</td></tr><tr><td><span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:#1a9850'></span></td><td>VAL_LIST_PASS</td><td>Counterparty country code is known</td><td>Validity</td><td>Medium</td><td>PASS</td><td>0</td><td>Data Steward Markets</td></tr><tr><td><span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:#d73027'></span></td><td>VAL_LIST_FAIL</td><td>Counterparty sector is an accepted code</td><td>Validity</td><td>High</td><td>FAIL</td><td>2</td><td>Control Owner</td></tr><tr><td><span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:#1a9850'></span></td><td>VAL_REGEX_PASS</td><td>Series key format</td><td>Validity</td><td>Low</td><td>PASS</td><td>0</td><td>Data Owner EUC</td></tr><tr><td><span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:#1a9850'></span></td><td>UNQ_PASS</td><td>Series identifier is unique</td><td>Uniqueness</td><td>High</td><td>PASS</td><td>0</td><td>Data Owner EUC</td></tr><tr><td><span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:#fdae61'></span></td><td>UNQ_FAIL</td><td>One row per business dimension combination</td><td>Uniqueness</td><td>Medium</td><td>FAIL</td><td>27290</td><td>Control Owner</td></tr><tr><td><span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:#1a9850'></span></td><td>CON_PASS</td><td>Counterparty sector exists in the code table</td><td>Consistency</td><td>Medium</td><td>PASS</td><td>0</td><td>Data Steward Reference</td></tr><tr><td><span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:#d73027'></span></td><td>CON_FAIL</td><td>Counterparty country exists in the code table</td><td>Consistency</td><td>High</td><td>FAIL</td><td>8997</td><td>Data Steward Reference</td></tr><tr><td><span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:#1a9850'></span></td><td>TIM_PASS</td><td>Feed refreshed within 10 years</td><td>Timeliness</td><td>Low</td><td>PASS</td><td>0</td><td>Control Owner</td></tr><tr><td><span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:#d73027'></span></td><td>TIM_FAIL</td><td>Feed refreshed within 7 days</td><td>Timeliness</td><td>High</td><td>FAIL</td><td>5</td><td>Data Steward Markets</td></tr><tr><td><span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:#1a9850'></span></td><td>REC_PASS</td><td>EUC positions tie to the ledger</td><td>Reconciliation</td><td>High</td><td>PASS</td><td>0</td><td>Finance Control</td></tr><tr><td><span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:#d73027'></span></td><td>REC_FAIL</td><td>EUC positions tie to the ledger (stressed feed)</td><td>Reconciliation</td><td>High</td><td>FAIL</td><td>4</td><td>Finance Control</td></tr>
+</table>
+</body></html>

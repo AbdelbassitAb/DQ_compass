@@ -1,0 +1,15 @@
+run_id,rule_id,control_name,control_type,severity,owner,status,traffic_light,exception_count,metric_total_records,metric_null_count,metric_completeness_pct,metric_exception_pct,metric_threshold_pct,metric_within_threshold,metric_invalid_count,metric_valid_pct,metric_duplicate_count,metric_duplicate_pct,metric_orphan_count,metric_orphan_pct,metric_sla_breach_count,metric_within_sla_pct,metric_break_count,metric_reconciled_pct
+0f13237e-03ba-4af3-9064-2445be279e9d,CMP_PASS,Risk category always populated,Completeness,High,Data Steward Markets,PASS,GREEN,0,77992,0.0,100.0,,,,,,,,,,,,,
+0f13237e-03ba-4af3-9064-2445be279e9d,CMP_FAIL,2013 turnover value populated,Completeness,Medium,Data Owner EUC,FAIL,ORANGE,17708,77992,17708.0,77.3,,,,,,,,,,,,,
+0f13237e-03ba-4af3-9064-2445be279e9d,CMP_THRESHOLD_PASS,2019 turnover value populated (<=30% gap tolerated),Completeness,Low,Data Owner EUC,PASS,GREEN,19969,77992,19969.0,74.4,25.6,30.0,True,,,,,,,,,,
+0f13237e-03ba-4af3-9064-2445be279e9d,VAL_LIST_PASS,Counterparty country code is known,Validity,Medium,Data Steward Markets,PASS,GREEN,0,77992,,,,,,0.0,100.0,,,,,,,,
+0f13237e-03ba-4af3-9064-2445be279e9d,VAL_LIST_FAIL,Counterparty sector is an accepted code,Validity,High,Control Owner,FAIL,RED,2,77992,,,,,,2.0,100.0,,,,,,,,
+0f13237e-03ba-4af3-9064-2445be279e9d,VAL_REGEX_PASS,Series key format,Validity,Low,Data Owner EUC,PASS,GREEN,0,77992,,,,,,0.0,100.0,,,,,,,,
+0f13237e-03ba-4af3-9064-2445be279e9d,UNQ_PASS,Series identifier is unique,Uniqueness,High,Data Owner EUC,PASS,GREEN,0,77992,,,,,,,,0.0,0.0,,,,,,
+0f13237e-03ba-4af3-9064-2445be279e9d,UNQ_FAIL,One row per business dimension combination,Uniqueness,Medium,Control Owner,FAIL,ORANGE,27290,77992,,,,,,,,27290.0,34.99,,,,,,
+0f13237e-03ba-4af3-9064-2445be279e9d,CON_PASS,Counterparty sector exists in the code table,Consistency,Medium,Data Steward Reference,PASS,GREEN,0,77992,,,,,,,,,,0.0,0.0,,,,
+0f13237e-03ba-4af3-9064-2445be279e9d,CON_FAIL,Counterparty country exists in the code table,Consistency,High,Data Steward Reference,FAIL,RED,8997,77992,,,,,,,,,,8997.0,11.54,,,,
+0f13237e-03ba-4af3-9064-2445be279e9d,TIM_PASS,Feed refreshed within 10 years,Timeliness,Low,Control Owner,PASS,GREEN,0,10,,,,,,,,,,,,0.0,100.0,,
+0f13237e-03ba-4af3-9064-2445be279e9d,TIM_FAIL,Feed refreshed within 7 days,Timeliness,High,Data Steward Markets,FAIL,RED,5,10,,,,,,,,,,,,5.0,50.0,,
+0f13237e-03ba-4af3-9064-2445be279e9d,REC_PASS,EUC positions tie to the ledger,Reconciliation,High,Finance Control,PASS,GREEN,0,12,,,,,,,,,,,,,,0.0,100.0
+0f13237e-03ba-4af3-9064-2445be279e9d,REC_FAIL,EUC positions tie to the ledger (stressed feed),Reconciliation,High,Finance Control,FAIL,RED,4,12,,,,,,,,,,,,,,4.0,66.67

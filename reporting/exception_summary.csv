@@ -1,0 +1,18 @@
+dimension,key,failing_rules,error_rules,total_exceptions
+severity,High,4,0,9008
+severity,Low,0,0,19969
+severity,Medium,2,0,44998
+owner,Control Owner,2,0,27292
+owner,Data Owner EUC,1,0,37677
+owner,Data Steward Markets,1,0,5
+owner,Data Steward Reference,1,0,8997
+owner,Finance Control,1,0,4
+control_type,Completeness,1,0,37677
+control_type,Consistency,1,0,8997
+control_type,Reconciliation,1,0,4
+control_type,Timeliness,1,0,5
+control_type,Uniqueness,1,0,27290
+control_type,Validity,1,0,2
+dataset,feed_status,1,0,5
+dataset,finance_data,4,0,73966
+dataset,recon_euc_positions,1,0,4

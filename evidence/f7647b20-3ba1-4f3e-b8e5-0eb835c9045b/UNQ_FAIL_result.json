@@ -1,0 +1,55 @@
+{
+  "run_id": "f7647b20-3ba1-4f3e-b8e5-0eb835c9045b",
+  "execution_timestamp_utc": "2026-09-08T11:17:33.416619+00:00",
+  "rule_id": "UNQ_FAIL",
+  "control_name": "One row per business dimension combination",
+  "control_type": "Uniqueness",
+  "control_function": "check_uniqueness",
+  "severity": "Medium",
+  "owner": "Control Owner",
+  "dataset_reference": {
+    "finance_data": "83d161d2e6af0c02"
+  },
+  "rule_configuration_snapshot": {
+    "dataset_scope": "finance_data",
+    "ref_dataset_scope": null,
+    "params": {
+      "keys": [
+        "DER_REP_CTY",
+        "DER_INSTR",
+        "DER_RISK",
+        "DER_SECTOR_CPY",
+        "DER_CURR_LEG1",
+        "DER_CURR_LEG2",
+        "DER_ISSUE_MAT",
+        "DER_RATING",
+        "DER_EX_METHOD",
+        "DER_BASIS"
+      ]
+    },
+    "threshold_pct": null
+  },
+  "execution_parameters": {
+    "keys": [
+      "DER_REP_CTY",
+      "DER_INSTR",
+      "DER_RISK",
+      "DER_SECTOR_CPY",
+      "DER_CURR_LEG1",
+      "DER_CURR_LEG2",
+      "DER_ISSUE_MAT",
+      "DER_RATING",
+      "DER_EX_METHOD",
+      "DER_BASIS"
+    ],
+    "threshold_pct": null
+  },
+  "status": "FAIL",
+  "metrics": {
+    "total_records": 77992,
+    "duplicate_count": 27290,
+    "duplicate_pct": 34.99
+  },
+  "exception_count": 27290,
+  "exceptions_evidence_path": "UNQ_FAIL_exceptions.csv"
+}

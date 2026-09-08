@@ -1,0 +1,40 @@
+{
+  "engine_version": "1.0",
+  "python_version": "3.12.8",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "host": "DESKTOP-1MK18SC",
+  "libraries": {
+    "pandas": "2.2.2",
+    "pyyaml": "6.0.3",
+    "openpyxl": "3.1.5"
+  },
+  "catalogue": {
+    "path": "control_catalogue.csv",
+    "sha256_16": "68887c88a7fde846"
+  },
+  "datasets_config": {
+    "path": "datasets_config.yaml",
+    "sha256_16": "49cce36776a64ed1"
+  },
+  "controls_module": {
+    "path": "C:\\Users\\Basset\\Downloads\\dq_compass\\dq_compass\\controls.py",
+    "sha256_16": "1e3fb9f290fa9c98"
+  },
+  "controls_used": {
+    "CMP_PASS": "check_completeness",
+    "CMP_FAIL": "check_completeness",
+    "CMP_THRESHOLD_PASS": "check_completeness",
+    "VAL_LIST_PASS": "check_validity",
+    "VAL_LIST_FAIL": "check_validity",
+    "VAL_REGEX_PASS": "check_validity",
+    "UNQ_PASS": "check_uniqueness",
+    "UNQ_FAIL": "check_uniqueness",
+    "CON_PASS": "check_consistency",
+    "CON_FAIL": "check_consistency",
+    "TIM_PASS": "check_timeliness",
+    "TIM_FAIL": "check_timeliness",
+    "REC_PASS": "check_reconciliation",
+    "REC_FAIL": "check_reconciliation"
+  },
+  "retention_note": "prototype: local mutable evidence files; production would use versioned WORM storage (S3 Object Lock / data lake)."
+}

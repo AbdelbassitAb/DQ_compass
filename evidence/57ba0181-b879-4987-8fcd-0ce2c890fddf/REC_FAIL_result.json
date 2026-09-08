@@ -1,0 +1,40 @@
+{
+  "run_id": "57ba0181-b879-4987-8fcd-0ce2c890fddf",
+  "execution_timestamp_utc": "2026-09-08T11:17:44.173029+00:00",
+  "rule_id": "REC_FAIL",
+  "control_name": "EUC positions tie to the ledger (stressed feed)",
+  "control_type": "Reconciliation",
+  "control_function": "check_reconciliation",
+  "severity": "High",
+  "owner": "Finance Control",
+  "dataset_reference": {
+    "recon_euc_positions": "680ca0d3ecbbbbbc",
+    "recon_gl_break": "949b852208ac446b"
+  },
+  "rule_configuration_snapshot": {
+    "dataset_scope": "recon_euc_positions",
+    "ref_dataset_scope": "recon_gl_break",
+    "params": {
+      "key": "deal_id",
+      "field": "amount",
+      "ref_field": "amount",
+      "tolerance_pct": 1
+    },
+    "threshold_pct": null
+  },
+  "execution_parameters": {
+    "key": "deal_id",
+    "field": "amount",
+    "ref_field": "amount",
+    "tolerance_pct": 1,
+    "threshold_pct": null
+  },
+  "status": "FAIL",
+  "metrics": {
+    "total_records": 12,
+    "break_count": 4,
+    "reconciled_pct": 66.67
+  },
+  "exception_count": 4,
+  "exceptions_evidence_path": "REC_FAIL_exceptions.csv"
+}

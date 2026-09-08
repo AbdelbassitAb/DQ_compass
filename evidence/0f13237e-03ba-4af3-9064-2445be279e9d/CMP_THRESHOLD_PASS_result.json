@@ -1,0 +1,36 @@
+{
+  "run_id": "0f13237e-03ba-4af3-9064-2445be279e9d",
+  "execution_timestamp_utc": "2026-09-08T11:17:53.939916+00:00",
+  "rule_id": "CMP_THRESHOLD_PASS",
+  "control_name": "2019 turnover value populated (<=30% gap tolerated)",
+  "control_type": "Completeness",
+  "control_function": "check_completeness",
+  "severity": "Low",
+  "owner": "Data Owner EUC",
+  "dataset_reference": {
+    "finance_data": "83d161d2e6af0c02"
+  },
+  "rule_configuration_snapshot": {
+    "dataset_scope": "finance_data",
+    "ref_dataset_scope": null,
+    "params": {
+      "field": "2019"
+    },
+    "threshold_pct": 30.0
+  },
+  "execution_parameters": {
+    "field": "2019",
+    "threshold_pct": 30.0
+  },
+  "status": "PASS",
+  "metrics": {
+    "total_records": 77992,
+    "null_count": 19969,
+    "completeness_pct": 74.4,
+    "exception_pct": 25.6,
+    "threshold_pct": 30.0,
+    "within_threshold": true
+  },
+  "exception_count": 19969,
+  "exceptions_evidence_path": "CMP_THRESHOLD_PASS_exceptions.csv"
+}

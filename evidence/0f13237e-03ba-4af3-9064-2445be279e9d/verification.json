@@ -1,0 +1,121 @@
+{
+  "run_id": "0f13237e-03ba-4af3-9064-2445be279e9d",
+  "verified_at": "2026-09-08T11:18:36.304594+00:00",
+  "method": "re-execute stored rule config against stored dataset snapshots",
+  "run_hash": "b1c8ba33ffd68f60",
+  "all_match": true,
+  "checks": [
+    {
+      "rule_id": "CMP_PASS",
+      "expected": "PASS",
+      "recomputed": "PASS",
+      "expected_exceptions": 0,
+      "recomputed_exceptions": 0,
+      "match": true
+    },
+    {
+      "rule_id": "CMP_FAIL",
+      "expected": "FAIL",
+      "recomputed": "FAIL",
+      "expected_exceptions": 17708,
+      "recomputed_exceptions": 17708,
+      "match": true
+    },
+    {
+      "rule_id": "CMP_THRESHOLD_PASS",
+      "expected": "PASS",
+      "recomputed": "PASS",
+      "expected_exceptions": 19969,
+      "recomputed_exceptions": 19969,
+      "match": true
+    },
+    {
+      "rule_id": "VAL_LIST_PASS",
+      "expected": "PASS",
+      "recomputed": "PASS",
+      "expected_exceptions": 0,
+      "recomputed_exceptions": 0,
+      "match": true
+    },
+    {
+      "rule_id": "VAL_LIST_FAIL",
+      "expected": "FAIL",
+      "recomputed": "FAIL",
+      "expected_exceptions": 2,
+      "recomputed_exceptions": 2,
+      "match": true
+    },
+    {
+      "rule_id": "VAL_REGEX_PASS",
+      "expected": "PASS",
+      "recomputed": "PASS",
+      "expected_exceptions": 0,
+      "recomputed_exceptions": 0,
+      "match": true
+    },
+    {
+      "rule_id": "UNQ_PASS",
+      "expected": "PASS",
+      "recomputed": "PASS",
+      "expected_exceptions": 0,
+      "recomputed_exceptions": 0,
+      "match": true
+    },
+    {
+      "rule_id": "UNQ_FAIL",
+      "expected": "FAIL",
+      "recomputed": "FAIL",
+      "expected_exceptions": 27290,
+      "recomputed_exceptions": 27290,
+      "match": true
+    },
+    {
+      "rule_id": "CON_PASS",
+      "expected": "PASS",
+      "recomputed": "PASS",
+      "expected_exceptions": 0,
+      "recomputed_exceptions": 0,
+      "match": true
+    },
+    {
+      "rule_id": "CON_FAIL",
+      "expected": "FAIL",
+      "recomputed": "FAIL",
+      "expected_exceptions": 8997,
+      "recomputed_exceptions": 8997,
+      "match": true
+    },
+    {
+      "rule_id": "TIM_PASS",
+      "expected": "PASS",
+      "recomputed": "PASS",
+      "expected_exceptions": 0,
+      "recomputed_exceptions": 0,
+      "match": true
+    },
+    {
+      "rule_id": "TIM_FAIL",
+      "expected": "FAIL",
+      "recomputed": "FAIL",
+      "expected_exceptions": 5,
+      "recomputed_exceptions": 5,
+      "match": true
+    },
+    {
+      "rule_id": "REC_PASS",
+      "expected": "PASS",
+      "recomputed": "PASS",
+      "expected_exceptions": 0,
+      "recomputed_exceptions": 0,
+      "match": true
+    },
+    {
+      "rule_id": "REC_FAIL",
+      "expected": "FAIL",
+      "recomputed": "FAIL",
+      "expected_exceptions": 4,
+      "recomputed_exceptions": 4,
+      "match": true
+    }
+  ]
+}

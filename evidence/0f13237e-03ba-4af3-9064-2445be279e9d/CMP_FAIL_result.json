@@ -1,0 +1,33 @@
+{
+  "run_id": "0f13237e-03ba-4af3-9064-2445be279e9d",
+  "execution_timestamp_utc": "2026-09-08T11:17:53.939916+00:00",
+  "rule_id": "CMP_FAIL",
+  "control_name": "2013 turnover value populated",
+  "control_type": "Completeness",
+  "control_function": "check_completeness",
+  "severity": "Medium",
+  "owner": "Data Owner EUC",
+  "dataset_reference": {
+    "finance_data": "83d161d2e6af0c02"
+  },
+  "rule_configuration_snapshot": {
+    "dataset_scope": "finance_data",
+    "ref_dataset_scope": null,
+    "params": {
+      "field": "2013"
+    },
+    "threshold_pct": null
+  },
+  "execution_parameters": {
+    "field": "2013",
+    "threshold_pct": null
+  },
+  "status": "FAIL",
+  "metrics": {
+    "total_records": 77992,
+    "null_count": 17708,
+    "completeness_pct": 77.3
+  },
+  "exception_count": 17708,
+  "exceptions_evidence_path": "CMP_FAIL_exceptions.csv"
+}

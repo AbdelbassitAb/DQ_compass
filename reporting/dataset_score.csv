@@ -1,0 +1,4 @@
+dataset_scope,n_rules,n_pass,n_fail,n_error,dq_score
+feed_status,2,1,1,0,58.3
+finance_data,10,6,4,0,94.2
+recon_euc_positions,2,1,1,0,83.3

@@ -1,0 +1,42 @@
+[
+  {
+    "rule_id": "VAL_LIST_FAIL",
+    "control_name": "Counterparty sector is an accepted code",
+    "severity": "High",
+    "status": "FAIL",
+    "owner": "Control Owner",
+    "exception_count": 2,
+    "dataset_scope": "finance_data",
+    "remediation_action": "Confirm whether related-party trades ('X') belong in this cut; if so, add 'X' to the rule, otherwise correct the source classification."
+  },
+  {
+    "rule_id": "CON_FAIL",
+    "control_name": "Counterparty country exists in the code table",
+    "severity": "High",
+    "status": "FAIL",
+    "owner": "Data Steward Reference",
+    "exception_count": 8997,
+    "dataset_scope": "finance_data",
+    "remediation_action": "Extend ref_dimension_codes with the missing counterparty-country grouping (5Z) after confirming it is a valid published code."
+  },
+  {
+    "rule_id": "TIM_FAIL",
+    "control_name": "Feed refreshed within 7 days",
+    "severity": "High",
+    "status": "FAIL",
+    "owner": "Data Steward Markets",
+    "exception_count": 5,
+    "dataset_scope": "feed_status",
+    "remediation_action": "Chase the source for the stale country feeds; escalate if no refresh in the next cycle."
+  },
+  {
+    "rule_id": "REC_FAIL",
+    "control_name": "EUC positions tie to the ledger (stressed feed)",
+    "severity": "High",
+    "status": "FAIL",
+    "owner": "Finance Control",
+    "exception_count": 4,
+    "dataset_scope": "recon_euc_positions",
+    "remediation_action": "Investigate each break: confirm the trade economics, then correct the EUC or the ledger; chase the deal that is missing on the ledger side."
+  }
+]
