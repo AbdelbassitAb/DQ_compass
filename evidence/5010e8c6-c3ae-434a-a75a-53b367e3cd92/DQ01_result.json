@@ -1,0 +1,33 @@
+{
+  "run_id": "5010e8c6-c3ae-434a-a75a-53b367e3cd92",
+  "execution_timestamp_utc": "2026-09-08T10:32:10.972483+00:00",
+  "rule_id": "DQ01",
+  "control_name": "Amount not null",
+  "control_type": "Completeness",
+  "control_function": "check_completeness",
+  "severity": "High",
+  "owner": "Data Steward Sales Ops",
+  "dataset_reference": {
+    "orders": "6a77f291d95aabde"
+  },
+  "rule_configuration_snapshot": {
+    "dataset_scope": "orders",
+    "ref_dataset_scope": null,
+    "params": {
+      "field": "amount"
+    },
+    "threshold_pct": null
+  },
+  "execution_parameters": {
+    "field": "amount",
+    "threshold_pct": null
+  },
+  "status": "FAIL",
+  "metrics": {
+    "total_records": 11,
+    "null_count": 1,
+    "completeness_pct": 90.91
+  },
+  "exception_count": 1,
+  "exceptions_evidence_path": "DQ01_exceptions.csv"
+}

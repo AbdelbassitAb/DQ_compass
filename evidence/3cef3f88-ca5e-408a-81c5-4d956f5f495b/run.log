@@ -1,0 +1,20 @@
+2026-09-08T10:32:10.275297+00:00  run_start         run_id=3cef3f88-ca5e-408a-81c5-4d956f5f495b  engine_version=1.0  catalogue=control_catalogue.csv
+2026-09-08T10:32:10.276240+00:00  rule_start        rule_id=DQ01  control_type=Completeness
+2026-09-08T10:32:10.293139+00:00  dataset_loaded    dataset=orders  rows=11  columns=6  hash=6a77f291d95aabde  snapshot=snapshots/orders.csv
+2026-09-08T10:32:10.299710+00:00  rule_done         rule_id=DQ01  status=FAIL  exceptions=1
+2026-09-08T10:32:10.300242+00:00  rule_start        rule_id=DQ02  control_type=Validity
+2026-09-08T10:32:10.305477+00:00  rule_done         rule_id=DQ02  status=FAIL  exceptions=1
+2026-09-08T10:32:10.305967+00:00  rule_start        rule_id=DQ03  control_type=Uniqueness
+2026-09-08T10:32:10.310993+00:00  rule_done         rule_id=DQ03  status=FAIL  exceptions=2
+2026-09-08T10:32:10.311398+00:00  rule_start        rule_id=DQ04  control_type=Consistency
+2026-09-08T10:32:10.319570+00:00  dataset_loaded    dataset=customers  rows=6  columns=4  hash=4e6706833d16b50c  snapshot=snapshots/customers.csv
+2026-09-08T10:32:10.324363+00:00  rule_done         rule_id=DQ04  status=FAIL  exceptions=1
+2026-09-08T10:32:10.324768+00:00  rule_start        rule_id=DQ05  control_type=Timeliness
+2026-09-08T10:32:10.339527+00:00  rule_done         rule_id=DQ05  status=FAIL  exceptions=3
+2026-09-08T10:32:10.339920+00:00  rule_start        rule_id=DQ06  control_type=Reconciliation
+2026-09-08T10:32:10.349822+00:00  dataset_loaded    dataset=orders_reference  rows=10  columns=2  hash=a5d3f98dc8752228  snapshot=snapshots/orders_reference.csv
+2026-09-08T10:32:10.367493+00:00  rule_done         rule_id=DQ06  status=FAIL  exceptions=1
+2026-09-08T10:32:10.367906+00:00  rule_start        rule_id=DQ07  control_type=Validity
+2026-09-08T10:32:10.370058+00:00  rule_done         rule_id=DQ07  status=PASS  exceptions=0
+2026-09-08T10:32:11.145782+00:00  system_trace_written  
+2026-09-08T10:32:11.166776+00:00  run_complete      rules=7  run_hash=1bee34406e1020f3

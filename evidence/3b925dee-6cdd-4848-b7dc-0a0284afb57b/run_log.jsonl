@@ -1,0 +1,20 @@
+{"ts": "2026-09-08T10:32:04.931505+00:00", "event": "run_start", "run_id": "3b925dee-6cdd-4848-b7dc-0a0284afb57b", "engine_version": "1.0", "catalogue": "control_catalogue.csv"}
+{"ts": "2026-09-08T10:32:04.932331+00:00", "event": "rule_start", "rule_id": "DQ01", "control_type": "Completeness"}
+{"ts": "2026-09-08T10:32:04.943730+00:00", "event": "dataset_loaded", "dataset": "orders", "rows": 11, "columns": 6, "hash": "6a77f291d95aabde", "snapshot": "snapshots/orders.csv"}
+{"ts": "2026-09-08T10:32:04.950133+00:00", "event": "rule_done", "rule_id": "DQ01", "status": "FAIL", "exceptions": 1}
+{"ts": "2026-09-08T10:32:04.950750+00:00", "event": "rule_start", "rule_id": "DQ02", "control_type": "Validity"}
+{"ts": "2026-09-08T10:32:04.956001+00:00", "event": "rule_done", "rule_id": "DQ02", "status": "FAIL", "exceptions": 1}
+{"ts": "2026-09-08T10:32:04.956434+00:00", "event": "rule_start", "rule_id": "DQ03", "control_type": "Uniqueness"}
+{"ts": "2026-09-08T10:32:04.961999+00:00", "event": "rule_done", "rule_id": "DQ03", "status": "FAIL", "exceptions": 2}
+{"ts": "2026-09-08T10:32:04.962398+00:00", "event": "rule_start", "rule_id": "DQ04", "control_type": "Consistency"}
+{"ts": "2026-09-08T10:32:04.971934+00:00", "event": "dataset_loaded", "dataset": "customers", "rows": 6, "columns": 4, "hash": "4e6706833d16b50c", "snapshot": "snapshots/customers.csv"}
+{"ts": "2026-09-08T10:32:04.976720+00:00", "event": "rule_done", "rule_id": "DQ04", "status": "FAIL", "exceptions": 1}
+{"ts": "2026-09-08T10:32:04.977146+00:00", "event": "rule_start", "rule_id": "DQ05", "control_type": "Timeliness"}
+{"ts": "2026-09-08T10:32:04.986505+00:00", "event": "rule_done", "rule_id": "DQ05", "status": "FAIL", "exceptions": 3}
+{"ts": "2026-09-08T10:32:04.986930+00:00", "event": "rule_start", "rule_id": "DQ06", "control_type": "Reconciliation"}
+{"ts": "2026-09-08T10:32:04.993913+00:00", "event": "dataset_loaded", "dataset": "orders_reference", "rows": 10, "columns": 2, "hash": "a5d3f98dc8752228", "snapshot": "snapshots/orders_reference.csv"}
+{"ts": "2026-09-08T10:32:05.007520+00:00", "event": "rule_done", "rule_id": "DQ06", "status": "FAIL", "exceptions": 1}
+{"ts": "2026-09-08T10:32:05.007883+00:00", "event": "rule_start", "rule_id": "DQ07", "control_type": "Validity"}
+{"ts": "2026-09-08T10:32:05.009830+00:00", "event": "rule_done", "rule_id": "DQ07", "status": "PASS", "exceptions": 0}
+{"ts": "2026-09-08T10:32:05.563652+00:00", "event": "system_trace_written"}
+{"ts": "2026-09-08T10:32:05.582971+00:00", "event": "run_complete", "rules": 7, "run_hash": "4d2c511625bca1d3"}

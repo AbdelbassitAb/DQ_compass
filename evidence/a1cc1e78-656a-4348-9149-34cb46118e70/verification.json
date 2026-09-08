@@ -1,0 +1,65 @@
+{
+  "run_id": "a1cc1e78-656a-4348-9149-34cb46118e70",
+  "verified_at": "2026-09-08T10:32:12.617107+00:00",
+  "method": "re-execute stored rule config against stored dataset snapshots",
+  "run_hash": "9fe3461d2f8694ad",
+  "all_match": true,
+  "checks": [
+    {
+      "rule_id": "DQ01",
+      "expected": "FAIL",
+      "recomputed": "FAIL",
+      "expected_exceptions": 1,
+      "recomputed_exceptions": 1,
+      "match": true
+    },
+    {
+      "rule_id": "DQ02",
+      "expected": "FAIL",
+      "recomputed": "FAIL",
+      "expected_exceptions": 1,
+      "recomputed_exceptions": 1,
+      "match": true
+    },
+    {
+      "rule_id": "DQ03",
+      "expected": "FAIL",
+      "recomputed": "FAIL",
+      "expected_exceptions": 2,
+      "recomputed_exceptions": 2,
+      "match": true
+    },
+    {
+      "rule_id": "DQ04",
+      "expected": "FAIL",
+      "recomputed": "FAIL",
+      "expected_exceptions": 1,
+      "recomputed_exceptions": 1,
+      "match": true
+    },
+    {
+      "rule_id": "DQ05",
+      "expected": "FAIL",
+      "recomputed": "FAIL",
+      "expected_exceptions": 3,
+      "recomputed_exceptions": 3,
+      "match": true
+    },
+    {
+      "rule_id": "DQ06",
+      "expected": "FAIL",
+      "recomputed": "FAIL",
+      "expected_exceptions": 1,
+      "recomputed_exceptions": 1,
+      "match": true
+    },
+    {
+      "rule_id": "DQ07",
+      "expected": "PASS",
+      "recomputed": "PASS",
+      "expected_exceptions": 0,
+      "recomputed_exceptions": 0,
+      "match": true
+    }
+  ]
+}

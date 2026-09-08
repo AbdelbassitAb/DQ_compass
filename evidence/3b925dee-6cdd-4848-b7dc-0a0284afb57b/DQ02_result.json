@@ -1,0 +1,45 @@
+{
+  "run_id": "3b925dee-6cdd-4848-b7dc-0a0284afb57b",
+  "execution_timestamp_utc": "2026-09-08T10:32:04.927141+00:00",
+  "rule_id": "DQ02",
+  "control_name": "Status must be valid",
+  "control_type": "Validity",
+  "control_function": "check_validity",
+  "severity": "Medium",
+  "owner": "Data Owner EUC",
+  "dataset_reference": {
+    "orders": "6a77f291d95aabde"
+  },
+  "rule_configuration_snapshot": {
+    "dataset_scope": "orders",
+    "ref_dataset_scope": null,
+    "params": {
+      "field": "status",
+      "allowed_values": [
+        "PENDING",
+        "SHIPPED",
+        "DELIVERED",
+        "CANCELLED"
+      ]
+    },
+    "threshold_pct": null
+  },
+  "execution_parameters": {
+    "field": "status",
+    "allowed_values": [
+      "PENDING",
+      "SHIPPED",
+      "DELIVERED",
+      "CANCELLED"
+    ],
+    "threshold_pct": null
+  },
+  "status": "FAIL",
+  "metrics": {
+    "total_records": 11,
+    "invalid_count": 1,
+    "valid_pct": 90.91
+  },
+  "exception_count": 1,
+  "exceptions_evidence_path": "DQ02_exceptions.csv"
+}

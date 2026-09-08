@@ -38,3 +38,15 @@ warehouse:
     table: orders
   created_at: '2026-09-07T20:56:24.886194+00:00'
   updated_at: '2026-09-07T20:56:24.886194+00:00'
+energy:
+  type: csv
+  status: active
+  config:
+    path: '"C:\Users\masis.zovikoglu\Downloads\control_catalogue.csv"'
+    delimiter: ','
+    header_row: '1'
+    encoding: utf-8
+    quotechar: '"'
+    skip_rows: '0'
+  created_at: '2026-09-08T10:19:25.567167+00:00'
+  updated_at: '2026-09-08T10:19:25.567167+00:00'

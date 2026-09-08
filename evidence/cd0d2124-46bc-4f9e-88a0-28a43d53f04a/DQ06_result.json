@@ -1,0 +1,40 @@
+{
+  "run_id": "cd0d2124-46bc-4f9e-88a0-28a43d53f04a",
+  "execution_timestamp_utc": "2026-09-08T10:32:10.092365+00:00",
+  "rule_id": "DQ06",
+  "control_name": "Amount reconciliation",
+  "control_type": "Reconciliation",
+  "control_function": "check_reconciliation",
+  "severity": "High",
+  "owner": "Control Owner",
+  "dataset_reference": {
+    "orders": "6a77f291d95aabde",
+    "orders_reference": "a5d3f98dc8752228"
+  },
+  "rule_configuration_snapshot": {
+    "dataset_scope": "orders",
+    "ref_dataset_scope": "orders_reference",
+    "params": {
+      "key": "order_id",
+      "field": "amount",
+      "ref_field": "amount",
+      "tolerance_pct": 0.5
+    },
+    "threshold_pct": null
+  },
+  "execution_parameters": {
+    "key": "order_id",
+    "field": "amount",
+    "ref_field": "amount",
+    "tolerance_pct": 0.5,
+    "threshold_pct": null
+  },
+  "status": "FAIL",
+  "metrics": {
+    "total_records": 11,
+    "break_count": 1,
+    "reconciled_pct": 90.91
+  },
+  "exception_count": 1,
+  "exceptions_evidence_path": "DQ06_exceptions.csv"
+}

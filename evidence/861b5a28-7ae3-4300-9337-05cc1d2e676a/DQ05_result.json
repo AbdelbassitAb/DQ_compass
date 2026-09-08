@@ -1,0 +1,38 @@
+{
+  "run_id": "861b5a28-7ae3-4300-9337-05cc1d2e676a",
+  "execution_timestamp_utc": "2026-09-08T10:32:05.457557+00:00",
+  "rule_id": "DQ05",
+  "control_name": "Order date freshness",
+  "control_type": "Timeliness",
+  "control_function": "check_timeliness",
+  "severity": "Medium",
+  "owner": "Control Owner",
+  "dataset_reference": {
+    "orders": "6a77f291d95aabde"
+  },
+  "rule_configuration_snapshot": {
+    "dataset_scope": "orders",
+    "ref_dataset_scope": null,
+    "params": {
+      "field": "order_date",
+      "max_lag_days": 3,
+      "reference_date": "today"
+    },
+    "threshold_pct": null
+  },
+  "execution_parameters": {
+    "field": "order_date",
+    "max_lag_days": 3,
+    "reference_date": "today",
+    "threshold_pct": null,
+    "reference_date_resolved": "2026-09-08"
+  },
+  "status": "FAIL",
+  "metrics": {
+    "total_records": 11,
+    "sla_breach_count": 3,
+    "within_sla_pct": 72.73
+  },
+  "exception_count": 3,
+  "exceptions_evidence_path": "DQ05_exceptions.csv"
+}

@@ -1,0 +1,2 @@
+order_id,customer_id,order_date,amount,status,region
+ORD005,CUST999,2026-09-05,560.0,DELIVERED,FR

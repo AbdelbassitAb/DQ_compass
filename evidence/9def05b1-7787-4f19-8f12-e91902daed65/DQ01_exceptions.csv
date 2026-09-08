@@ -1,0 +1,2 @@
+order_id,customer_id,order_date,amount,status,region
+ORD002,CUST002,2026-09-06,,SHIPPED,FR
