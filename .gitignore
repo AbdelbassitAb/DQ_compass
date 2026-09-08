@@ -1,0 +1,22 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# --- generated at runtime (regenerate with the CLI) ---
+evidence/                       # dqcompass run     -> Evidence Packs + runs_ledger.jsonl
+reporting/*.csv                 # dqcompass report  -> scorecards, coverage, trend, ...
+reporting/*.html
+reporting/alerts.json
+reporting/supervisory_mapping.csv
+
+# --- audit logs written by the web app ---
+catalogue_changelog.jsonl
+data_sources_changelog.jsonl
+
+# --- one-time migration backups ---
+*.backup.csv
+*.backup.yaml

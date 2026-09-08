@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui %}
+{% block title %}Home — DQ Compass{% endblock %}
+{% block crumb %}<b>Home</b>{% endblock %}
+{% block content %}
+
+{% call ui.page_header('Data Quality Control Layer', 'One place to define controls, register the data they run on, and see the state of the whole layer.') %}
+  <a href="{{ url_for('rule_new') }}" class="btn">{{ ui.icon('plus') }} New rule</a>
+  <a href="{{ url_for('source_new') }}" class="btn btn-primary">{{ ui.icon('plus') }} New data source</a>
+{% endcall %}
+
+<div class="stat-row" style="margin-bottom:18px">
+  {% set n_inactive = health.rules_total - health.rules_active %}
+  {{ ui.stat(health.rules_active ~ ' / ' ~ health.rules_total, 'Active rules',
+             'tone-accent', n_inactive ~ ' inactive') }}
+  {{ ui.stat(health.rules_errors, 'Rules with errors',
+             'tone-bad' if health.rules_errors else 'tone-ok',
+             (health.rules_warnings ~ ' with warnings') if health.rules_warnings else 'all clear') }}
+  {{ ui.stat(health.datasets_covered ~ ' / ' ~ health.datasets, 'Datasets covered',
+             '', 'across 6 DQ dimensions') }}
+  {{ ui.stat(health.sources_active ~ ' / ' ~ health.sources_total, 'Active data sources',
+             '', health.connectors_impl ~ ' / ' ~ health.connectors_total ~ ' connectors live') }}
+</div>
+
+<div class="grid grid-2">
+
+  <div class="card">
+    <div class="card-head"><h2>Latest engine run</h2>
+      {% if latest %}
+        <span style="display:flex;gap:6px">
+          <a href="{{ url_for('reporting') }}" class="btn btn-ghost btn-sm">{{ ui.icon('chart') }} Reporting</a>
+          <a href="{{ url_for('run_detail', run_id=latest.run_id) }}" class="btn btn-ghost btn-sm">Open run {{ ui.icon('chevron') }}</a>
+        </span>
+      {% else %}<form method="post" action="{{ url_for('run_now') }}"><button class="btn btn-ghost btn-sm">{{ ui.icon('refresh') }} Run</button></form>{% endif %}
+    </div>
+    <div class="card-pad">
+      {% if latest %}
+        {% set c = latest.counts %}
+        {% set total = latest.total or 1 %}
+        {% set gp = (c.PASS / total * 100)|round(1) %}
+        {% set rp = (c.FAIL / total * 100)|round(1) %}
+        <div class="runbar">
+          <div class="donut">
+            <svg width="92" height="92" viewBox="0 0 42 42">
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--surface-3)" stroke-width="6"/>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--ok)" stroke-width="6"
+                      stroke-dasharray="{{ gp }} {{ 100 - gp }}" stroke-dashoffset="25"/>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--bad)" stroke-width="6"
+                      stroke-dasharray="{{ rp }} {{ 100 - rp }}" stroke-dashoffset="{{ 25 - gp }}"/>
+            </svg>
+            <div class="center"><b>{{ latest.total }}</b><span>rules</span></div>
+          </div>
+          <div class="run-legend">
+            <div><span class="dot dot-ok"></span> Passing <b>{{ c.PASS }}</b></div>
+            <div><span class="dot dot-bad"></span> Failing <b>{{ c.FAIL }}</b></div>
+            <div><span class="dot dot-grey"></span> Errors <b>{{ c.ERROR }}</b></div>
+          </div>
+        </div>
+        <p class="muted small" style="margin-top:12px;margin-bottom:0">
+          Run <code>{{ latest.run_id[:8] }}</code> ·
+          <a href="{{ url_for('runs') }}">all runs</a> ·
+          <form method="post" action="{{ url_for('run_now') }}" style="display:inline"><button class="btn btn-ghost btn-sm">{{ ui.icon('refresh') }} Run again</button></form>
+        </p>
+      {% else %}
+        <div class="empty">{{ ui.icon('play') }}<div>No engine run yet.
+          <form method="post" action="{{ url_for('run_now') }}" style="margin-top:8px"><button class="btn btn-sm btn-primary">{{ ui.icon('refresh') }} Run engine now</button></form>
+        </div></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Needs attention</h2>
+      <span class="badge {{ 'bad' if attention else 'ok' }}">{{ attention|length }}</span>
+    </div>
+    <div class="card-pad">
+      {% if attention %}
+        {% for a in attention %}
+        <a class="issue {{ 'err' if a.kind == 'rule' else 'wrn' }}" href="{{ a.href }}" style="border-bottom:1px solid var(--border);padding:8px 0">
+          {{ ui.icon('alert') }}
+          <span><b>{{ a.ref }}</b> — {{ a.text }}</span>
+        </a>
+        {% endfor %}
+      {% else %}
+        <div class="empty">{{ ui.icon('check') }}<div>Everything validates. No blocking issues.</div></div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<div class="card" style="margin-top:16px">
+  <div class="card-head"><h2>Coverage — datasets &times; dimensions</h2>
+    <a href="{{ url_for('catalogue') }}" class="btn btn-ghost btn-sm">{{ ui.icon('grid') }} Open catalogue</a>
+  </div>
+  <div class="card-pad scroll-x">
+    {% if coverage %}
+    <div class="coverage">
+      <div class="ch"></div>
+      {% for t in control_types %}<div class="ch">{{ t[:4] }}</div>{% endfor %}
+      {% for ds, cells in coverage.items() %}
+        <div class="rh">{{ ds }}</div>
+        {% for t in control_types %}
+          {% set ids = cells[t] %}
+          <div class="cell {{ 'on' if ids else 'off' }}" title="{{ ids|join(', ') or 'no control' }}">{{ ids|length if ids else '' }}</div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">{{ ui.icon('database') }}<div>No active data source. <a href="{{ url_for('source_new') }}">Add one</a>.</div></div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <div class="card-head"><h2>Recent activity</h2>
+    <a href="{{ url_for('activity') }}" class="btn btn-ghost btn-sm">View all</a>
+  </div>
+  <div class="card-pad">
+    {% if recent %}
+    <div class="timeline">
+      {% for e in recent %}
+      <div class="tl-item act-{{ e.action }}">
+        <div class="tl-head">
+          <span class="badge">{{ e.action }}</span>
+          <b>{{ e.ref }}</b>
+          <span class="muted small">{{ e.scope }}</span>
+          <span class="who small">· {{ e.user }}</span>
+          <span class="when">{{ e.timestamp[:19] }}Z</span>
+        </div>
+        {% if e.note %}<div class="tl-note">{{ e.note }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">{{ ui.icon('clock') }}<div>No changes recorded yet.</div></div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

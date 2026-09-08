@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui %}
+{% block title %}Data Sources — DQ Compass{% endblock %}
+{% block crumb %}<b>Data Sources</b>{% endblock %}
+{% block content %}
+
+{% call ui.page_header('Data Sources', health.total ~ ' registered · ' ~ health.active ~ ' active · ' ~ health.implemented ~ '/' ~ health.connectors ~ ' connectors implemented') %}
+  <a href="{{ url_for('activity', scope='source') }}" class="btn btn-ghost">{{ ui.icon('activity') }} Audit</a>
+  <a href="{{ url_for('source_new') }}" class="btn btn-primary">{{ ui.icon('plus') }} New data source</a>
+{% endcall %}
+
+<div class="src-grid">
+  {% for e in enriched %}
+    {% set s = e.src %}{% set rep = e.report %}
+    <div class="card src-card {{ 'is-inactive' if s.status != 'active' else '' }}">
+      <div class="sc-head">
+        <span class="conn-badge">{{ e.conn.icon }}</span>
+        <span class="sc-name">{{ s.name }}</span>
+        {% if s.status == 'active' %}<span class="badge ok">active</span>
+        {% elif s.status == 'planned' %}<span class="badge info">preview</span>
+        {% else %}<span class="badge warn">retired</span>{% endif %}
+        <details class="menu">
+          <summary>{{ ui.icon('dots') }}</summary>
+          <div class="menu-pop">
+            <form method="post" action="{{ url_for('source_rename', name=s.name) }}">
+              <label>Rename &amp; retarget rules</label>
+              <input name="new_name" placeholder="new name" required>
+              <button class="btn btn-sm" style="width:100%">Rename</button>
+            </form>
+            <hr>
+            <form method="post" action="{{ url_for('source_purge', name=s.name) }}"
+                  onsubmit="return confirm('Permanently remove {{ s.name }}?')">
+              <label>Purge permanently</label>
+              <input name="confirm" placeholder="type PURGE" required>
+              <button class="btn btn-sm btn-danger" style="width:100%">Purge</button>
+            </form>
+          </div>
+        </details>
+      </div>
+      <div class="sc-body">
+        {{ e.conn.label }} · {{ e.summary }}
+        {% if e.probe and not e.probe.ok %}<div class="issue wrn" style="margin-top:6px">{{ ui.icon('alert') }}<span>{{ e.probe.error }}</span></div>{% endif %}
+        {% for i in rep.errors %}<div class="issue err" style="margin-top:6px">{{ ui.icon('alert') }}<span>[{{ i.field }}] {{ i.message }}</span></div>{% endfor %}
+        <div class="sc-used">
+          {% for rid in e.used_by %}<a class="chip" href="{{ url_for('rule_edit', rule_id=rid) }}">{{ rid }}</a>{% endfor %}
+          {% if not e.used_by %}<span class="muted small">used by no rule</span>{% endif %}
+        </div>
+      </div>
+      <div class="sc-foot">
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('source_edit', name=s.name) }}">{{ ui.icon('edit') }} Edit</a>
+        {% if s.status == 'active' %}
+          <form method="post" action="{{ url_for('source_retire', name=s.name) }}"
+                onsubmit="return confirm('Retire {{ s.name }}? Dependent rules will be deactivated (reversible).')">
+            <button class="btn btn-ghost btn-sm">Retire</button>
+          </form>
+        {% else %}
+          <form method="post" action="{{ url_for('source_reactivate', name=s.name) }}">
+            <button class="btn btn-ghost btn-sm">Reactivate</button>
+          </form>
+          {% if e.used_by %}
+          <form method="post" action="{{ url_for('source_reactivate_rules', name=s.name) }}">
+            <button class="btn btn-ghost btn-sm">+ rules</button>
+          </form>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% if not enriched %}
+<div class="empty">{{ ui.icon('database') }}<div>No data source registered. <a href="{{ url_for('source_new') }}">Add one</a>.</div></div>
+{% endif %}
+
+<div class="card card-pad" style="margin-top:20px">
+  <h3 style="margin-bottom:6px">Delete policy</h3>
+  <p class="muted small" style="margin:0">
+    <b>Retire</b> is a reversible soft delete — the source is kept, dependent rules are deactivated and
+    can be brought back. <b>Purge</b> removes the source for good; rule <em>definitions</em> are never
+    deleted, only deactivated. <b>Rename</b> rewrites <code>dataset_scope</code> /
+    <code>ref_dataset_scope</code> on every dependent rule in one logged transaction. A rule pointing at
+    a missing or retired source does not crash the engine — it produces an <code>ERROR</code> record and
+    the run continues.
+  </p>
+</div>
+
+<div class="downloads">
+  <a href="{{ url_for('download_sources') }}">{{ ui.icon('download') }} datasets_config.yaml</a>
+  <a href="{{ url_for('download_sources_changelog') }}">{{ ui.icon('download') }} data_sources_changelog.jsonl</a>
+</div>
+{% endblock %}

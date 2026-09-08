@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui %}
+{% block title %}Catalogue — DQ Compass{% endblock %}
+{% block crumb %}<b>Catalogue</b>{% endblock %}
+{% block content %}
+
+{% call ui.page_header('Control Catalogue', health.total ~ ' rules · ' ~ health.active ~ ' active · ' ~ health.datasets_covered ~ '/' ~ health.datasets ~ ' datasets covered') %}
+  <a href="{{ url_for('download_catalogue') }}" class="btn btn-ghost">{{ ui.icon('download') }} CSV</a>
+  <a href="{{ url_for('rule_new') }}" class="btn btn-primary">{{ ui.icon('plus') }} New rule</a>
+{% endcall %}
+
+<div data-filter-root>
+  <div class="toolbar">
+    <div class="search">{{ ui.icon('search') }}<input data-filter-search placeholder="Search rules…"></div>
+    <div class="chipset">
+      <button class="fchip on" data-group="state" data-filter-chip="">All</button>
+      <button class="fchip" data-group="state" data-filter-chip="error">Errors</button>
+      <button class="fchip" data-group="state" data-filter-chip="warn">Warnings</button>
+      <button class="fchip" data-group="state" data-filter-chip="inactive">Inactive</button>
+    </div>
+    <div class="chipset">
+      {% for t in control_types %}
+      <button class="fchip" data-group="type" data-filter-chip="{{ t }}">{{ t }}</button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="rows">
+    {% for e in enriched %}
+      {% set r = e.rule %}{% set rep = e.report %}
+      {% set st = 'error' if not rep.ok else ('warn' if rep.warnings else 'ok') %}
+      <div class="row-item {{ 'is-inactive' if not r.active else '' }}" data-item data-expand
+           data-type="{{ r.control_type }}"
+           data-state="{{ st }}{{ ' inactive' if not r.active else '' }}"
+           data-search="{{ r.rule_id }} {{ r.control_name }} {{ r.control_type }} {{ r.dataset_scope }} {{ r.description }}">
+        <span class="dot dot-{{ 'bad' if not rep.ok else ('warn' if rep.warnings else 'ok') }}"></span>
+        <div class="row-main">
+          <div class="row-title"><span class="rid">{{ r.rule_id }}</span><span class="rname">{{ r.control_name }}</span></div>
+          <div class="row-meta">
+            <span>{{ r.control_type }}</span><span class="sep">·</span>
+            <span><code>{{ r.dataset_scope }}</code>{% if r.ref_dataset_scope %} → <code>{{ r.ref_dataset_scope }}</code>{% endif %}</span>
+            <span class="sep">·</span>{{ ui.sev_pill(r.severity) }}
+            <span class="sep">·</span><span>{{ r.frequency }}</span>
+            <span class="sep">·</span><span>{{ (r.threshold_pct|string ~ '%') if r.threshold_pct is not none else 'binary' }}</span>
+            {% if not r.active %}<span class="sep">·</span><span class="badge">inactive</span>{% endif %}
+          </div>
+        </div>
+        <div class="row-right">
+          {% if not rep.ok %}<span class="badge bad">{{ rep.errors|length }} error(s)</span>
+          {% elif rep.warnings %}<span class="badge warn">{{ rep.warnings|length }} alert(s)</span>
+          {% else %}<span class="badge ok">{{ ui.icon('check') }} OK</span>{% endif %}
+          <div class="row-actions">
+            <a class="btn btn-ghost btn-sm" href="{{ url_for('rule_edit', rule_id=r.rule_id) }}">{{ ui.icon('edit') }}</a>
+            <form method="post" action="{{ url_for('rule_toggle', rule_id=r.rule_id) }}">
+              <button class="btn btn-ghost btn-sm">{{ 'off' if r.active else 'on' }}</button>
+            </form>
+            <form method="post" action="{{ url_for('rule_delete', rule_id=r.rule_id) }}"
+                  onsubmit="return confirm('Delete {{ r.rule_id }}? (recorded in the audit log)')">
+              <button class="btn btn-ghost btn-sm btn-danger">{{ ui.icon('trash') }}</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="row-detail" data-detail>
+        <div class="row-detail-inner">
+          <p class="muted small" style="margin:0 0 8px">{{ r.description }}</p>
+          <pre style="margin-bottom:8px">{{ r.logic_definition }}</pre>
+          {% for i in rep.errors %}<div class="issue err">{{ ui.icon('alert') }}<span>[{{ i.field }}] {{ i.message }}</span></div>{% endfor %}
+          {% for i in rep.warnings %}<div class="issue wrn">{{ ui.icon('alert') }}<span>[{{ i.field }}] {{ i.message }}</span></div>{% endfor %}
+          {% for i in rep.infos %}<div class="issue inf">{{ ui.icon('info') }}<span>[{{ i.field }}] {{ i.message }}</span></div>{% endfor %}
+          <p class="small" style="margin:8px 0 0"><b>Owner</b> {{ r.owner }} · <b>KPI</b> {{ r.kpi }} · <b>Remediation</b> {{ r.remediation_action }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="empty" data-filter-empty hidden>{{ ui.icon('search') }}<div>No rule matches the filters.</div></div>
+  {% if not enriched %}
+  <div class="empty">{{ ui.icon('rules') }}<div>The catalogue is empty. <a href="{{ url_for('rule_new') }}">Create the first rule</a>.</div></div>
+  {% endif %}
+</div>
+
+<div class="card" style="margin-top:22px">
+  <div class="card-head"><h2>Coverage matrix</h2></div>
+  <div class="card-pad scroll-x">
+    <div class="coverage">
+      <div class="ch"></div>
+      {% for t in control_types %}<div class="ch">{{ t[:4] }}</div>{% endfor %}
+      {% for ds, cells in coverage.items() %}
+        <div class="rh">{{ ds }}</div>
+        {% for t in control_types %}
+          {% set ids = cells[t] %}
+          <div class="cell {{ 'on' if ids else 'off' }}" title="{{ ids|join(', ') or 'no control' }}">{{ ids|length if ids else '' }}</div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

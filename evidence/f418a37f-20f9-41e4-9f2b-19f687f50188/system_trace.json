@@ -1,0 +1,33 @@
+{
+  "engine_version": "1.0",
+  "python_version": "3.12.8",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "host": "DESKTOP-1MK18SC",
+  "libraries": {
+    "pandas": "2.2.2",
+    "pyyaml": "6.0.3",
+    "openpyxl": "3.1.5"
+  },
+  "catalogue": {
+    "path": "control_catalogue.csv",
+    "sha256_16": "d49ab9c8b21b0d99"
+  },
+  "datasets_config": {
+    "path": "datasets_config.yaml",
+    "sha256_16": "376a3b9aa0c8291e"
+  },
+  "controls_module": {
+    "path": "C:\\Users\\Basset\\Downloads\\dq_compass\\dq_compass\\controls.py",
+    "sha256_16": "8017ad044eac27c0"
+  },
+  "controls_used": {
+    "DQ01": "check_completeness",
+    "DQ02": "check_validity",
+    "DQ03": "check_uniqueness",
+    "DQ04": "check_consistency",
+    "DQ05": "check_timeliness",
+    "DQ06": "check_reconciliation",
+    "DQ07": "check_validity"
+  },
+  "retention_note": "prototype: local mutable evidence files; production would use versioned WORM storage (S3 Object Lock / data lake)."
+}

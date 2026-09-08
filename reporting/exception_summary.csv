@@ -1,0 +1,13 @@
+dimension,key,failing_rules,error_rules,total_exceptions
+severity,High,4,0,5
+severity,Medium,2,0,4
+owner,Control Owner,2,0,4
+owner,Data Owner EUC,2,0,3
+owner,Data Steward Sales Ops,2,0,2
+control_type,Completeness,1,0,1
+control_type,Consistency,1,0,1
+control_type,Reconciliation,1,0,1
+control_type,Timeliness,1,0,3
+control_type,Uniqueness,1,0,2
+control_type,Validity,1,0,1
+dataset,orders,6,0,9

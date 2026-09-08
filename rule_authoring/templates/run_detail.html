@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui %}
+{% block title %}Run {{ run_id[:8] }} — DQ Compass{% endblock %}
+{% block crumb %}<a href="{{ url_for('runs') }}">Runs</a> <span class="muted">/</span> <b>{{ run_id[:8] }}</b>{% endblock %}
+{% block content %}
+<a href="{{ url_for('runs') }}" class="btn btn-ghost btn-sm">{{ ui.icon('back') }} Back to runs</a>
+
+{% set total = counts.PASS + counts.FAIL + counts.ERROR %}
+{% call ui.page_header('Run ' ~ run_id[:8], summary.run_timestamp_utc[:19] ~ 'Z · engine ' ~ summary.engine_version) %}
+  <form method="post" action="{{ url_for('run_verify', run_id=run_id) }}" style="display:inline">
+    <button class="btn btn-primary">{{ ui.icon('shield') }} Verify this run</button>
+  </form>
+  <a class="btn btn-ghost" href="{{ url_for('download_run_file', run_id=run_id, name='run_summary.json') }}">{{ ui.icon('download') }} JSON</a>
+{% endcall %}
+
+<div class="grid grid-2">
+  <div class="card card-pad">
+    <h3 style="margin-bottom:8px">Evidence Pack</h3>
+    <table class="kv">
+      <tr><td>Run ID</td><td><code>{{ run_id }}</code></td></tr>
+      <tr><td>Run hash</td><td><code>{{ summary.run_hash }}</code></td></tr>
+      <tr><td>Previous run hash</td><td><code>{{ summary.previous_run_hash or '— (first run)' }}</code></td></tr>
+      <tr><td>Catalogue hash</td><td><code>{{ summary.catalogue_version_hash }}</code></td></tr>
+      <tr><td>datasets_config hash</td><td><code>{{ summary.datasets_config_hash }}</code></td></tr>
+      <tr><td>Dataset snapshots</td><td>{% for s in summary.dataset_snapshots %}<code>{{ s }}</code> {% endfor %}</td></tr>
+      <tr><td>Rules executed</td><td>{{ summary.rules_executed }}</td></tr>
+    </table>
+  </div>
+
+  <div class="card card-pad">
+    <h3 style="margin-bottom:10px">Result</h3>
+    <div class="segbar">
+      {% if total %}
+      <span class="seg seg-ok" style="width:{{ (counts.PASS / total * 100)|round(1) }}%"></span>
+      <span class="seg seg-bad" style="width:{{ (counts.FAIL / total * 100)|round(1) }}%"></span>
+      <span class="seg seg-grey" style="width:{{ (counts.ERROR / total * 100)|round(1) }}%"></span>
+      {% endif %}
+    </div>
+    <div class="run-legend" style="margin-top:12px">
+      <div><span class="dot dot-ok"></span> Passing <b>{{ counts.PASS }}</b></div>
+      <div><span class="dot dot-bad"></span> Failing <b>{{ counts.FAIL }}</b></div>
+      <div><span class="dot dot-grey"></span> Errors <b>{{ counts.ERROR }}</b></div>
+    </div>
+    <hr>
+    {% if verification %}
+      <p class="small" style="margin:0">
+        {% if verification.all_match %}<span class="badge ok">{{ ui.icon('shield') }} reproducible</span>{% else %}<span class="badge bad">{{ ui.icon('shield') }} mismatch</span>{% endif %}
+        verified {{ verification.verified_at[:19] }}Z — re-executed stored config against stored snapshots.
+      </p>
+    {% else %}
+      <p class="small muted" style="margin:0">Not verified yet. "Verify this run" re-executes the stored rule config against the stored dataset snapshots and asserts identical results (Appendix B.3).</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <div class="card-head"><h2>Control results</h2></div>
+  <div class="card-pad">
+    <div data-filter-root>
+      <div class="toolbar">
+        <div class="search">{{ ui.icon('search') }}<input data-filter-search placeholder="Search rules…"></div>
+        <div class="chipset">
+          <button class="fchip on" data-group="st" data-filter-chip="">All</button>
+          <button class="fchip" data-group="st" data-filter-chip="FAIL">Failing</button>
+          <button class="fchip" data-group="st" data-filter-chip="PASS">Passing</button>
+          <button class="fchip" data-group="st" data-filter-chip="ERROR">Errors</button>
+        </div>
+      </div>
+      <div class="rows">
+        {% for r in summary.results %}
+        <div class="row-item" data-item data-expand data-st="{{ r.status }}"
+             data-search="{{ r.rule_id }} {{ r.control_name }} {{ r.control_type }}">
+          {{ ui.status_dot(r.status) }}
+          <div class="row-main">
+            <div class="row-title"><span class="rid">{{ r.rule_id }}</span><span class="rname">{{ r.control_name }}</span></div>
+            <div class="row-meta">
+              <span>{{ r.control_type }}</span>
+              {% if r.control_function %}<span class="sep">·</span><code>{{ r.control_function }}()</code>{% endif %}
+              <span class="sep">·</span>{{ ui.sev_pill(r.severity) }}
+              <span class="sep">·</span><span>{{ r.owner }}</span>
+            </div>
+          </div>
+          <div class="row-right">
+            <span class="badge {{ 'ok' if r.status == 'PASS' else ('bad' if r.status == 'FAIL' else '') }}">{{ r.status }}</span>
+            {% if r.exception_count %}<span class="badge">{{ r.exception_count }} exc.</span>{% endif %}
+          </div>
+        </div>
+        <div class="row-detail" data-detail>
+          <div class="row-detail-inner">
+            {% if r.error %}<div class="issue err">{{ ui.icon('alert') }}<span>{{ r.error }}</span></div>{% endif %}
+            <div class="kv-grid">
+              <div><b>Metrics</b><pre>{{ r.metrics | tojson(indent=2) }}</pre></div>
+              <div><b>Config snapshot</b><pre>{{ r.rule_configuration_snapshot | tojson(indent=2) }}</pre></div>
+              <div><b>Execution parameters</b><pre>{{ r.execution_parameters | tojson(indent=2) }}</pre></div>
+            </div>
+            {% if r.exceptions_preview %}
+            <p class="small" style="margin:10px 0 4px"><b>Exception records</b> — showing {{ r.exceptions_preview.rows|length }} of {{ r.exceptions_preview.total }}</p>
+            <div class="scroll-x"><table class="preview-table">
+              <tr>{% for c in r.exceptions_preview.columns %}<th>{{ c }}</th>{% endfor %}</tr>
+              {% for row in r.exceptions_preview.rows %}<tr>{% for c in r.exceptions_preview.columns %}<td>{{ row[c] }}</td>{% endfor %}</tr>{% endfor %}
+            </table></div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="empty" data-filter-empty hidden>{{ ui.icon('search') }}<div>No control matches the filters.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <div class="card-head"><h2>Reporting</h2>
+    <a href="{{ url_for('reporting') }}" class="btn btn-ghost btn-sm">{{ ui.icon('chart') }} Full reporting</a>
+  </div>
+  <div class="card-pad">
+    <div class="grid grid-2">
+      <div>
+        <h3 style="margin-bottom:8px">Dataset DQ score <span class="muted small">(severity-weighted, 0–100)</span></h3>
+        <table class="doc"><thead><tr><th>Dataset</th><th>Rules</th><th>Pass / Fail / Err</th><th>Score</th></tr></thead><tbody>
+        {% for d in dataset_score %}
+          <tr><td><code>{{ d.dataset_scope }}</code></td><td>{{ d.n_rules }}</td>
+            <td>{{ d.n_pass }} / {{ d.n_fail }} / {{ d.n_error }}</td>
+            <td><b class="{{ 'stat' }}" style="color:{{ 'var(--ok)' if d.dq_score >= 90 else ('var(--warn)' if d.dq_score >= 70 else 'var(--bad)') }}">{{ d.dq_score }}</b></td></tr>
+        {% endfor %}
+        </tbody></table>
+      </div>
+      <div>
+        <h3 style="margin-bottom:8px">Coverage on this run</h3>
+        <table class="doc"><thead><tr><th>Dataset</th><th>Dimension</th><th>Rules</th></tr></thead><tbody>
+        {% for c in coverage %}<tr><td><code>{{ c.dataset_scope }}</code></td><td>{{ c.control_type }}</td><td>{{ c.rule_ids }}</td></tr>{% endfor %}
+        </tbody></table>
+      </div>
+    </div>
+
+    {% if alerts %}
+    <h3 style="margin:16px 0 8px">Actionable alerts <span class="badge bad">{{ alerts|length }}</span>
+      <span class="muted small">failing High-severity controls + remediation</span></h3>
+    {% for a in alerts %}
+    <div class="issue err" style="border-bottom:1px solid var(--border);padding:8px 0;display:block">
+      {{ ui.icon('alert') }} <b>{{ a.rule_id }} {{ a.control_name }}</b> — {{ a.exception_count }} exception(s) on <code>{{ a.dataset_scope }}</code>, owner {{ a.owner }}.
+      <div class="muted small" style="margin-top:2px">→ {{ a.remediation_action }}</div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="downloads" style="margin-top:14px">
+      <a href="{{ url_for('download_report', name='scorecard.csv') }}">{{ ui.icon('download') }} scorecard.csv</a>
+      <a href="{{ url_for('download_report', name='exceptions_detail.csv') }}">{{ ui.icon('download') }} exceptions_detail.csv</a>
+      <a href="{{ url_for('download_report', name='coverage.csv') }}">{{ ui.icon('download') }} coverage.csv</a>
+      <a href="{{ url_for('download_report', name='dataset_score.csv') }}">{{ ui.icon('download') }} dataset_score.csv</a>
+      <a href="{{ url_for('download_report', name='exception_summary.csv') }}">{{ ui.icon('download') }} exception_summary.csv</a>
+      <a href="{{ url_for('download_report', name='trend.csv') }}">{{ ui.icon('download') }} trend.csv</a>
+      <a href="{{ url_for('download_report', name='scorecard.html') }}">{{ ui.icon('external') }} scorecard.html</a>
+    </div>
+    <p class="muted small" style="margin:8px 0 0">CSV downloads reflect the <b>latest</b> engine run (that is what
+      <code>scorecard.py</code> writes); the tables above are computed for <b>this</b> run.</p>
+  </div>
+</div>
+
+{% if verification %}
+<div class="card" style="margin-top:16px">
+  <div class="card-head"><h2>Verification</h2>
+    <span class="badge {{ 'ok' if verification.all_match else 'bad' }}">{{ 'all match' if verification.all_match else 'mismatch' }}</span>
+  </div>
+  <div class="card-pad scroll-x">
+    <p class="small muted">{{ verification.method }} · {{ verification.verified_at[:19] }}Z</p>
+    <table class="doc">
+      <thead><tr><th>Rule</th><th>Expected</th><th>Recomputed</th><th>Exceptions (exp / got)</th><th></th></tr></thead>
+      <tbody>
+      {% for c in verification.checks %}
+      <tr>
+        <td><code>{{ c.rule_id }}</code></td>
+        <td>{{ c.expected }}</td><td>{{ c.recomputed }}</td>
+        <td>{{ c.get('expected_exceptions', '—') }} / {{ c.get('recomputed_exceptions', '—') }}</td>
+        <td>{% if c.match %}<span class="badge ok">{{ ui.icon('check') }}</span>{% else %}<span class="badge bad">{{ ui.icon('x') }}</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="grid grid-2" style="margin-top:16px">
+  <div class="card card-pad">
+    <h3 style="margin-bottom:8px">Sign-off</h3>
+    {% if signoff %}
+      <p class="small" style="margin:0">
+        <span class="badge info">{{ signoff.decision }}</span>
+        by <b>{{ signoff.reviewed_by }}</b> on {{ signoff.reviewed_at[:19] }}Z
+      </p>
+      {% if signoff.comment %}<p class="small muted" style="margin:6px 0 0">{{ signoff.comment }}</p>{% endif %}
+    {% else %}
+      <form method="post" action="{{ url_for('run_signoff', run_id=run_id) }}">
+        <label class="small">Decision
+          <select name="decision">
+            <option>acknowledged</option>
+            <option>accepted</option>
+            <option>rejected — remediation required</option>
+          </select>
+        </label>
+        <label class="small" style="display:block;margin-top:8px">Comment
+          <input name="comment" placeholder="optional" style="width:100%;padding:7px 9px;border:1px solid var(--border-strong);border-radius:var(--r-sm);background:var(--surface);color:var(--text)">
+        </label>
+        <button class="btn btn-sm" style="margin-top:10px">{{ ui.icon('flag') }} Record sign-off</button>
+      </form>
+    {% endif %}
+  </div>
+
+  <div class="card card-pad">
+    <h3 style="margin-bottom:8px">System trace</h3>
+    {% if system_trace %}
+    <table class="kv">
+      <tr><td>Engine</td><td>{{ system_trace.engine_version }}</td></tr>
+      <tr><td>Python</td><td>{{ system_trace.python_version }}</td></tr>
+      <tr><td>Host</td><td>{{ system_trace.host }} · {{ system_trace.platform }}</td></tr>
+      <tr><td>pandas / openpyxl</td><td>{{ system_trace.libraries.pandas }} / {{ system_trace.libraries.openpyxl }}</td></tr>
+      <tr><td>controls.py hash</td><td><code>{{ system_trace.controls_module.sha256_16 }}</code></td></tr>
+    </table>
+    <p class="small muted" style="margin:8px 0 0">{{ system_trace.retention_note }}</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <div class="card-head"><h2>Processing log</h2></div>
+  <div class="card-pad"><pre>{{ log_tail | join('\n') }}</pre></div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{
+  "run_id": "a1cc1e78-656a-4348-9149-34cb46118e70",
+  "execution_timestamp_utc": "2026-09-07T22:42:41.674877+00:00",
+  "rule_id": "DQ07",
+  "control_name": "Region must be a known code",
+  "control_type": "Validity",
+  "control_function": "check_validity",
+  "severity": "Medium",
+  "owner": "Data Steward Sales Ops",
+  "dataset_reference": {
+    "orders": "6a77f291d95aabde"
+  },
+  "rule_configuration_snapshot": {
+    "dataset_scope": "orders",
+    "ref_dataset_scope": null,
+    "params": {
+      "field": "region",
+      "allowed_values": [
+        "FR",
+        "BE",
+        "DE"
+      ]
+    },
+    "threshold_pct": 2.0
+  },
+  "execution_parameters": {
+    "field": "region",
+    "allowed_values": [
+      "FR",
+      "BE",
+      "DE"
+    ],
+    "threshold_pct": 2.0
+  },
+  "status": "PASS",
+  "metrics": {
+    "total_records": 11,
+    "invalid_count": 0,
+    "valid_pct": 100.0,
+    "exception_pct": 0.0,
+    "threshold_pct": 2.0
+  },
+  "exception_count": 0,
+  "exceptions_evidence_path": null
+}

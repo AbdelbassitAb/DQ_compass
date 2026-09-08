@@ -1,0 +1,7 @@
+dataset_scope,control_type,rule_ids,n_rules
+orders,Completeness,DQ01,1
+orders,Consistency,DQ04,1
+orders,Reconciliation,DQ06,1
+orders,Timeliness,DQ05,1
+orders,Uniqueness,DQ03,1
+orders,Validity,DQ02; DQ07,2

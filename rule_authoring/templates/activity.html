@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui %}
+{% block title %}Activity — DQ Compass{% endblock %}
+{% block crumb %}<b>Activity</b>{% endblock %}
+{% block content %}
+
+{% call ui.page_header('Activity', 'Append-only audit log across the catalogue and the data source registry. Each entry carries the SHA-256 hash of the file before and after.') %}
+  <a href="{{ url_for('download_changelog') }}" class="btn btn-ghost btn-sm">{{ ui.icon('download') }} Catalogue log</a>
+  <a href="{{ url_for('download_sources_changelog') }}" class="btn btn-ghost btn-sm">{{ ui.icon('download') }} Sources log</a>
+{% endcall %}
+
+<div class="toolbar">
+  <div class="chipset">
+    <a class="fchip {{ 'on' if scope == 'all' else '' }}" href="{{ url_for('activity') }}">All</a>
+    <a class="fchip {{ 'on' if scope == 'rule' else '' }}" href="{{ url_for('activity', scope='rule') }}">Rules</a>
+    <a class="fchip {{ 'on' if scope == 'source' else '' }}" href="{{ url_for('activity', scope='source') }}">Data sources</a>
+  </div>
+</div>
+
+<div class="card card-pad">
+  {% if entries %}
+  <div class="timeline">
+    {% for e in entries %}
+    <div class="tl-item act-{{ e.action }}">
+      <div class="tl-head">
+        <span class="badge">{{ e.action }}</span>
+        <b>{{ e.ref }}</b>
+        <span class="muted small">{{ e.scope }}</span>
+        <span class="who small">· {{ e.user }}</span>
+        <span class="when">{{ e.timestamp[:19] }}Z</span>
+      </div>
+      {% if e.note %}<div class="tl-note">{{ e.note }}</div>{% endif %}
+      <div class="tl-diff">
+        {% if e.scope == 'rule' and e.before and e.after %}
+          {% for k in e.after.keys() %}
+            {% if e.before.get(k) != e.after.get(k) %}
+              <div><b>{{ k }}</b>: <s>{{ e.before.get(k) }}</s> → {{ e.after.get(k) }}</div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+        {% if e.new_name %}<div>renamed to <code>{{ e.new_name }}</code></div>{% endif %}
+        {% if e.deactivated_rules %}<div>deactivated rules: {{ e.deactivated_rules|join(', ') }}</div>{% endif %}
+        {% if e.retargeted_rules %}<div>retargeted rules: {{ e.retargeted_rules|join(', ') }}</div>{% endif %}
+        {% set h = e.hash_after or e.catalogue_hash_after %}
+        {% if h %}<div class="muted">hash {{ h }}</div>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">{{ ui.icon('clock') }}<div>No activity recorded yet.</div></div>
+  {% endif %}
+</div>
+{% endblock %}

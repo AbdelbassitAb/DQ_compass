@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui %}
+{% block title %}Runs — DQ Compass{% endblock %}
+{% block crumb %}<b>Runs</b>{% endblock %}
+{% block content %}
+
+{% call ui.page_header('Engine Runs', 'Every execution is an Evidence Pack (Appendix B): run id, timestamps, dataset snapshots, rule config, metrics, exceptions, logs and system trace. The run ledger chains each run to the previous one.') %}
+  <a href="{{ url_for('activity') }}" class="btn btn-ghost">{{ ui.icon('activity') }} Activity</a>
+  <form method="post" action="{{ url_for('run_now') }}" style="display:inline">
+    <button class="btn btn-primary">{{ ui.icon('refresh') }} Run engine now</button>
+  </form>
+{% endcall %}
+
+{% if not runs %}
+<div class="empty">{{ ui.icon('box') }}<div>No run yet. Click <b>Run engine now</b>, or run <code>python dq_engine.py</code>.</div></div>
+{% else %}
+<div class="rows">
+  {% for r in runs %}
+  <a class="row-item" href="{{ url_for('run_detail', run_id=r.run_id) }}" style="cursor:pointer">
+    <span class="dot dot-{{ 'bad' if r.counts.FAIL or r.counts.ERROR else 'ok' }}"></span>
+    <div class="row-main">
+      <div class="row-title">
+        <span class="rid">{{ r.run_id[:8] }}</span>
+        <span class="rname">{{ r.timestamp[:19] }}Z</span>
+      </div>
+      <div class="row-meta">
+        <span>{{ r.rules_executed }} rules</span><span class="sep">·</span>
+        <span class="badge ok">{{ r.counts.PASS }} pass</span>
+        <span class="badge bad">{{ r.counts.FAIL }} fail</span>
+        {% if r.counts.ERROR %}<span class="badge">{{ r.counts.ERROR }} error</span>{% endif %}
+        <span class="sep">·</span><span>engine {{ r.engine_version }}</span>
+        <span class="sep">·</span><span>hash <code>{{ r.run_hash }}</code></span>
+      </div>
+    </div>
+    <div class="row-right">
+      {% if r.verified is true %}<span class="badge ok">{{ ui.icon('shield') }} verified</span>
+      {% elif r.verified is false %}<span class="badge bad">{{ ui.icon('shield') }} mismatch</span>
+      {% else %}<span class="badge">not verified</span>{% endif %}
+      {% if r.signed_off %}<span class="badge info">{{ ui.icon('check') }} signed off</span>{% endif %}
+      {{ ui.icon('chevron') }}
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

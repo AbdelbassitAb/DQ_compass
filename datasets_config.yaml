@@ -1,0 +1,40 @@
+orders:
+  type: csv
+  status: active
+  config:
+    delimiter: ','
+    encoding: utf-8
+    header_row: 1
+    path: sample_data/orders.csv
+  created_at: '2026-09-07T20:55:30.499614+00:00'
+  updated_at: '2026-09-07T20:56:37.955179+00:00'
+orders_reference:
+  type: csv
+  status: active
+  config:
+    delimiter: ','
+    encoding: utf-8
+    header_row: 1
+    path: sample_data/orders_reference.csv
+  created_at: '2026-09-07T20:55:30.499614+00:00'
+  updated_at: '2026-09-07T20:56:52.867906+00:00'
+customers:
+  type: csv
+  status: active
+  config:
+    path: sample_data/customers.csv
+    delimiter: ','
+    header_row: '1'
+  created_at: '2026-09-07T20:55:30.499614+00:00'
+  updated_at: '2026-09-07T22:09:01.405116+00:00'
+warehouse:
+  type: sql
+  status: planned
+  config:
+    driver: postgresql
+    host: db.internal
+    port: '5432'
+    database: dwh
+    table: orders
+  created_at: '2026-09-07T20:56:24.886194+00:00'
+  updated_at: '2026-09-07T20:56:24.886194+00:00'

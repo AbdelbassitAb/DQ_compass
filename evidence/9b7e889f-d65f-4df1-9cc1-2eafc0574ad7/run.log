@@ -1,0 +1,20 @@
+2026-09-07T22:42:33.997247+00:00  run_start         run_id=9b7e889f-d65f-4df1-9cc1-2eafc0574ad7  engine_version=1.0  catalogue=control_catalogue.csv
+2026-09-07T22:42:33.997247+00:00  rule_start        rule_id=DQ01  control_type=Completeness
+2026-09-07T22:42:34.028497+00:00  dataset_loaded    dataset=orders  rows=11  columns=6  hash=6a77f291d95aabde  snapshot=snapshots/orders.csv
+2026-09-07T22:42:34.028497+00:00  rule_done         rule_id=DQ01  status=FAIL  exceptions=1
+2026-09-07T22:42:34.028497+00:00  rule_start        rule_id=DQ02  control_type=Validity
+2026-09-07T22:42:34.044122+00:00  rule_done         rule_id=DQ02  status=FAIL  exceptions=1
+2026-09-07T22:42:34.044122+00:00  rule_start        rule_id=DQ03  control_type=Uniqueness
+2026-09-07T22:42:34.044122+00:00  rule_done         rule_id=DQ03  status=FAIL  exceptions=2
+2026-09-07T22:42:34.044122+00:00  rule_start        rule_id=DQ04  control_type=Consistency
+2026-09-07T22:42:34.059753+00:00  dataset_loaded    dataset=customers  rows=6  columns=4  hash=4e6706833d16b50c  snapshot=snapshots/customers.csv
+2026-09-07T22:42:34.059753+00:00  rule_done         rule_id=DQ04  status=FAIL  exceptions=1
+2026-09-07T22:42:34.075375+00:00  rule_start        rule_id=DQ05  control_type=Timeliness
+2026-09-07T22:42:34.090998+00:00  rule_done         rule_id=DQ05  status=FAIL  exceptions=3
+2026-09-07T22:42:34.090998+00:00  rule_start        rule_id=DQ06  control_type=Reconciliation
+2026-09-07T22:42:34.090998+00:00  dataset_loaded    dataset=orders_reference  rows=10  columns=2  hash=a5d3f98dc8752228  snapshot=snapshots/orders_reference.csv
+2026-09-07T22:42:34.124277+00:00  rule_done         rule_id=DQ06  status=FAIL  exceptions=1
+2026-09-07T22:42:34.126103+00:00  rule_start        rule_id=DQ07  control_type=Validity
+2026-09-07T22:42:34.129101+00:00  rule_done         rule_id=DQ07  status=PASS  exceptions=0
+2026-09-07T22:42:34.730862+00:00  system_trace_written  
+2026-09-07T22:42:34.747060+00:00  run_complete      rules=7  run_hash=6bcbbec1c5eb3e48

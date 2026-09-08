@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui %}
+{% block title %}Supervisory Mapping — DQ Compass{% endblock %}
+{% block crumb %}<b>Supervisory Mapping</b>{% endblock %}
+{% block content %}
+
+{% call ui.page_header('Supervisory Mapping', 'Appendix C — generated from the catalogue: each control mapped to the supervisory requirement it satisfies, the evidence it produces and its last execution.') %}
+  <a href="{{ url_for('download_mapping') }}" class="btn btn-primary">{{ ui.icon('download') }} supervisory_mapping.csv</a>
+{% endcall %}
+
+<div class="card">
+  <div class="card-head"><h2>Requirement &rarr; Control &rarr; Evidence &rarr; Output <small class="muted">(C.2 / C.3)</small></h2></div>
+  <div class="card-pad scroll-x">
+    <table class="doc">
+      <thead><tr>
+        <th>Rule</th><th>Requirement</th><th>Control implemented</th><th>Evidence generated</th>
+        <th>Output</th><th>Last run</th>
+      </tr></thead>
+      <tbody>
+      {% for r in rows %}
+      <tr>
+        <td><code>{{ r.rule_id }}</code><br><span class="muted small">{{ r.control_type }} · {{ r.severity }}</span></td>
+        <td>{{ r.requirement }}</td>
+        <td>{{ r.control_implemented }}<br><span class="muted small">owner: {{ r.owner }} · KPI: {{ r.kpi }}</span></td>
+        <td class="small">{{ r.evidence_generated }}</td>
+        <td>{{ r.output }}</td>
+        <td class="small">
+          {% if r.last_run_id %}
+            <a href="{{ url_for('run_detail', run_id=r.last_run_id) }}"><code>{{ r.last_run_id[:8] }}</code></a><br>
+            {{ r.last_run_status }} · {{ r.last_run_timestamp[:10] }}<br>
+            <span class="muted">hash {{ r.last_run_hash }}</span>
+          {% else %}<span class="muted">never executed</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+      {% if not rows %}<tr><td colspan="6">No active rule in the catalogue.</td></tr>{% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <div class="card-head"><h2>Key supervisory principles demonstrated <small class="muted">(C.4)</small></h2></div>
+  <div class="card-pad">
+    {% for name, text in principles %}
+    <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+      <b>{{ name }}</b><div class="muted small" style="margin-top:2px">{{ text }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui %}
+{% block title %}{{ 'New rule' if mode == 'new' else 'Edit ' ~ rule.rule_id }} — DQ Compass{% endblock %}
+{% block crumb %}<a href="{{ url_for('catalogue') }}">Catalogue</a> <span class="muted">/</span> <b>{{ 'New rule' if mode == 'new' else rule.rule_id }}</b>{% endblock %}
+
+{% macro flabel(text, key, required=false) -%}
+{{ text }}{% if required %} <span class="req" title="required">*</span>{% endif %}
+{%- if schema.FIELD_HELP.get(key) %} <a class="help" href="{{ url_for('docs') }}#{{ key }}"
+   data-tip="{{ schema.FIELD_HELP[key] }}" target="_blank" rel="noopener">?</a>{% endif %}
+{%- endmacro %}
+
+{% block content %}
+<a href="{{ url_for('catalogue') }}" class="btn btn-ghost btn-sm">{{ ui.icon('back') }} Back to catalogue</a>
+
+{% call ui.page_header('Create a rule' if mode == 'new' else 'Edit ' ~ rule.rule_id,
+   'Fields marked * are required. Hover ? for help, click for the docs.') %}{% endcall %}
+
+{% if report and not report.ok %}
+<div class="report-box bad form-wrap">
+  <b>{{ report.errors|length }} blocking error(s) — the rule was not saved</b>
+  {% for i in report.errors %}<div>{{ ui.icon('alert') }} [{{ i.field }}] {{ i.message }}</div>{% endfor %}
+  {% for i in report.warnings %}<div>{{ ui.icon('info') }} [{{ i.field }}] {{ i.message }}</div>{% endfor %}
+</div>
+{% endif %}
+
+<form method="post" class="rule-form form-wrap"
+      action="{{ url_for('rule_save', rule_id=rule.rule_id) if mode == 'edit' else url_for('rule_save') }}"
+      data-preview="{{ url_for('preview') }}">
+
+  <fieldset>
+    <legend>Identity <small>(Appendix A.2)</small></legend>
+    <div class="grid">
+      <label>{{ flabel('Rule ID', 'rule_id', true) }}
+        <input name="rule_id" value="{{ rule.rule_id }}" {{ 'readonly' if mode == 'edit' else '' }} required>
+      </label>
+      <label>{{ flabel('Control Name', 'control_name', true) }}
+        <input name="control_name" value="{{ rule.control_name }}" maxlength="80" required>
+      </label>
+      <label>{{ flabel('Control Type', 'control_type', true) }}
+        <select name="control_type" id="control_type" required>
+          {% for t in schema.CONTROL_TYPES %}<option value="{{ t }}" {{ 'selected' if rule.control_type == t else '' }}>{{ t }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>{{ flabel('Severity', 'severity', true) }}
+        <select name="severity">{% for s in schema.SEVERITIES %}<option {{ 'selected' if rule.severity == s else '' }}>{{ s }}</option>{% endfor %}</select>
+      </label>
+      <label>{{ flabel('Frequency', 'frequency', true) }}
+        <select name="frequency">{% for f in schema.FREQUENCIES %}<option {{ 'selected' if rule.frequency == f else '' }}>{{ f }}</option>{% endfor %}</select>
+      </label>
+      <label>{{ flabel('Owner', 'owner', true) }}
+        <input name="owner" value="{{ rule.owner }}" required>
+      </label>
+      <label>{{ flabel('Output Type', 'output_type', true) }}
+        <input name="output_type" list="output_types" value="{{ rule.output_type }}" required>
+        <datalist id="output_types">{% for o in schema.OUTPUT_TYPE_SUGGESTIONS %}<option value="{{ o }}">{% endfor %}</datalist>
+      </label>
+      <label>{{ flabel('KPI', 'kpi', true) }}
+        <input name="kpi" value="{{ rule.kpi }}" required>
+      </label>
+    </div>
+    <label class="wide">{{ flabel('Description', 'description', true) }}
+      <textarea name="description" rows="2" required>{{ rule.description }}</textarea>
+    </label>
+    <label class="wide">{{ flabel('Remediation Action', 'remediation_action', true) }}
+      <textarea name="remediation_action" rows="2" required>{{ rule.remediation_action }}</textarea>
+    </label>
+    <label class="wide">{{ flabel('Regulatory reference', 'regulatory_ref') }} <small>(optional — feeds the Supervisory Mapping)</small>
+      <input name="regulatory_ref" list="reg_refs" value="{{ rule.regulatory_ref }}" placeholder="e.g. BCBS 239 - Principle 4 (Completeness)">
+      <datalist id="reg_refs">{% for x in schema.REGULATORY_REF_SUGGESTIONS %}<option value="{{ x }}">{% endfor %}</datalist>
+    </label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Target &amp; threshold</legend>
+    <div class="grid">
+      <label>{{ flabel('Dataset Scope', 'dataset_scope', true) }}
+        <select name="dataset_scope" id="dataset_scope" required>
+          <option value="">— choose —</option>
+          {% for d in datasets %}<option {{ 'selected' if rule.dataset_scope == d else '' }}>{{ d }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="param-group" data-types="Consistency Reconciliation">
+        {{ flabel('Reference dataset', 'ref_dataset_scope', true) }}
+        <select name="ref_dataset_scope" id="ref_dataset_scope">
+          <option value="">— choose —</option>
+          {% for d in datasets %}<option {{ 'selected' if rule.ref_dataset_scope == d else '' }}>{{ d }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>{{ flabel('Tolerance threshold (%)', 'threshold_pct') }}
+        <input name="threshold_pct" type="number" step="0.1" min="0" max="100"
+               value="{{ rule.threshold_pct if rule.threshold_pct is not none else '' }}"
+               placeholder="empty = binary">
+      </label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Control logic <small>(parameters depend on the type)</small></legend>
+
+    <label class="param-group" data-types="Completeness Validity Consistency Timeliness Reconciliation">
+      {{ flabel('Tested field (field)', 'p_field', true) }}
+      <input name="p_field" list="cols_main" value="{{ rule.params.get('field', '') }}">
+    </label>
+    <label class="param-group" data-types="Uniqueness">
+      {{ flabel('Key columns (keys, comma-separated)', 'p_keys', true) }}
+      <input name="p_keys" list="cols_main" value="{{ rule.params.get('keys', [])|join(', ') }}">
+    </label>
+    <label class="param-group" data-types="Reconciliation">
+      {{ flabel('Match key (key)', 'p_key', true) }}
+      <input name="p_key" list="cols_main" value="{{ rule.params.get('key', '') }}">
+    </label>
+    <label class="param-group" data-types="Consistency Reconciliation">
+      {{ flabel('Reference field (ref_field)', 'p_ref_field', true) }}
+      <input name="p_ref_field" list="cols_ref" value="{{ rule.params.get('ref_field', '') }}">
+    </label>
+
+    {% set vmode = 'allowed_values' if rule.params.get('allowed_values')
+                   else ('regex' if rule.params.get('regex')
+                   else ('range' if (rule.params.get('min_val') is not none or rule.params.get('max_val') is not none)
+                   else 'allowed_values')) %}
+    <div class="param-group validity" data-types="Validity">
+      <div class="param-label">{{ flabel('Validity criterion — choose one only', 'p_validity_mode', true) }}</div>
+      <label class="radio"><input type="radio" name="p_validity_mode" value="allowed_values" {{ 'checked' if vmode == 'allowed_values' else '' }}> Allowed value list</label>
+      <label class="sub" data-vmode="allowed_values">{{ flabel('values (one per line or comma-separated)', 'p_allowed_values') }}
+        <textarea name="p_allowed_values" rows="3">{{ rule.params.get('allowed_values', [])|join('\n') }}</textarea>
+      </label>
+      <label class="radio"><input type="radio" name="p_validity_mode" value="regex" {{ 'checked' if vmode == 'regex' else '' }}> Regular expression</label>
+      <label class="sub" data-vmode="regex">{{ flabel('regex', 'p_regex') }}
+        <input name="p_regex" value="{{ rule.params.get('regex', '') }}">
+      </label>
+      <label class="radio"><input type="radio" name="p_validity_mode" value="range" {{ 'checked' if vmode == 'range' else '' }}> Numeric range</label>
+      <div class="sub row" data-vmode="range">
+        <label>{{ flabel('min', 'p_min_val') }} <input name="p_min_val" type="number" step="any" value="{{ rule.params.get('min_val', '') }}"></label>
+        <label>{{ flabel('max', 'p_max_val') }} <input name="p_max_val" type="number" step="any" value="{{ rule.params.get('max_val', '') }}"></label>
+      </div>
+    </div>
+
+    <div class="param-group row" data-types="Timeliness">
+      <label>{{ flabel('max lag (days)', 'p_max_lag_days', true) }}
+        <input name="p_max_lag_days" type="number" min="1" value="{{ rule.params.get('max_lag_days', '') }}"></label>
+      <label>{{ flabel('reference date', 'p_reference_date') }}
+        <input name="p_reference_date" value="{{ rule.params.get('reference_date', 'today') }}" placeholder="today or YYYY-MM-DD"></label>
+    </div>
+    <label class="param-group" data-types="Reconciliation">
+      {{ flabel('unit gap tolerance (%)', 'p_tolerance_pct', true) }}
+      <input name="p_tolerance_pct" type="number" step="0.01" min="0" max="100" value="{{ rule.params.get('tolerance_pct', '') }}">
+    </label>
+
+    <datalist id="cols_main"></datalist>
+    <datalist id="cols_ref"></datalist>
+  </fieldset>
+
+  <fieldset class="preview-card">
+    <legend>Generated preview</legend>
+    <p class="plain"><b>Plain language:</b> <span id="preview-plain">—</span></p>
+    <pre id="preview-logic">—</pre>
+    <p class="small" style="margin:8px 0 0">
+      <b>Data element</b> {{ flabel('', 'data_element') }}: <span id="preview-de">—</span>
+      &nbsp;·&nbsp; <b>Threshold</b> {{ flabel('', 'threshold') }}: <span id="preview-th">—</span>
+    </p>
+  </fieldset>
+
+  <label class="wide">{{ flabel('Change note', 'note') }} <small>(audit log)</small>
+    <input name="note" placeholder="e.g. control requested by Finance">
+  </label>
+  <label class="check"><input type="checkbox" name="active" {{ 'checked' if rule.active else '' }}> Rule active {{ flabel('', 'active') }}</label>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">{{ ui.icon('check') }} Save</button>
+    <a href="{{ url_for('catalogue') }}" class="btn">Cancel</a>
+  </div>
+
+  <script id="dataset-columns" type="application/json">{{ dataset_columns|tojson }}</script>
+</form>
+{% endblock %}

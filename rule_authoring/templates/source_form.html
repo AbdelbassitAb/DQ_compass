@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui %}
+{% block title %}{{ 'New data source' if mode == 'new' else 'Edit ' ~ src.name }} — DQ Compass{% endblock %}
+{% block crumb %}<a href="{{ url_for('sources') }}">Data Sources</a> <span class="muted">/</span> <b>{{ 'New' if mode == 'new' else src.name }}</b>{% endblock %}
+{% block content %}
+<a href="{{ url_for('sources') }}" class="btn btn-ghost btn-sm">{{ ui.icon('back') }} Back to data sources</a>
+
+{% call ui.page_header('New data source' if mode == 'new' else 'Edit ' ~ src.name,
+   'Pick a connector, fill its fields, then Test connection to preview. Only CSV and Excel run in this prototype.') %}{% endcall %}
+
+{% if report and not report.ok %}
+<div class="report-box bad form-wrap">
+  <b>{{ report.errors|length }} blocking error(s) — the source was not saved</b>
+  {% for i in report.errors %}<div>{{ ui.icon('alert') }} [{{ i.field }}] {{ i.message }}</div>{% endfor %}
+  {% for i in report.warnings %}<div>{{ ui.icon('info') }} [{{ i.field }}] {{ i.message }}</div>{% endfor %}
+</div>
+{% endif %}
+
+<form method="post" class="rule-form source-form form-wrap"
+      action="{{ url_for('source_save', name=src.name) if mode == 'edit' else url_for('source_save') }}"
+      data-probe="{{ url_for('source_probe') }}">
+  <input type="hidden" name="type" id="src-type" value="{{ src.type }}">
+
+  <fieldset>
+    <legend>Connector</legend>
+    <div class="tiles">
+      {% for c in connectors %}
+      <button type="button" class="tile {{ 'selected' if c.type == src.type else '' }} {{ 'planned' if not c.implemented else '' }}" data-conn="{{ c.type }}">
+        <span class="tile-icon">{{ c.icon }}</span>
+        <span class="tile-label">{{ c.label }}</span>
+        <span class="tile-desc">{{ c.description }}</span>
+        {% if not c.implemented %}<span class="ribbon">preview</span>{% endif %}
+      </button>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Identity</legend>
+    <div class="grid">
+      <label>Name <span class="req">*</span>
+        <input name="name" value="{{ src.name }}" {{ 'readonly' if mode == 'edit' else '' }} required placeholder="orders">
+      </label>
+      <label>Change note <small>(audit log)</small>
+        <input name="note" placeholder="e.g. added Q3 export from SharePoint">
+      </label>
+    </div>
+  </fieldset>
+
+  {% for c in connectors %}
+  <fieldset class="conn-fields" data-conn="{{ c.type }}" {{ 'hidden' if c.type != src.type else '' }}>
+    <legend>{{ c.label }} settings{% if not c.implemented %} <small>— preview, saved as <code>preview</code></small>{% endif %}</legend>
+    <div class="grid">
+      {% for f in c.fields if not f.advanced %}
+      <label>
+        {{ f.label }}{% if f.required %} <span class="req">*</span>{% endif %}
+        {% if f.help %}<a class="help" data-tip="{{ f.help }}" tabindex="0">?</a>{% endif %}
+        {% set val = src.config.get(f.name, f.default) %}
+        {% if f.kind == 'select' %}
+          <select name="cfg_{{ c.type }}__{{ f.name }}">{% for o in f.options %}<option {{ 'selected' if val|string == o else '' }}>{{ o }}</option>{% endfor %}</select>
+        {% elif f.kind == 'bool' %}
+          <input type="checkbox" name="cfg_{{ c.type }}__{{ f.name }}" {{ 'checked' if src.config.get(f.name) else '' }}>
+        {% elif f.kind == 'textarea' %}
+          <textarea name="cfg_{{ c.type }}__{{ f.name }}" rows="2" placeholder="{{ f.placeholder }}">{{ src.config.get(f.name, '') }}</textarea>
+        {% else %}
+          <input type="{{ 'password' if f.kind == 'secret' else ('number' if f.kind == 'number' else 'text') }}"
+                 name="cfg_{{ c.type }}__{{ f.name }}" value="{{ val }}" placeholder="{{ f.placeholder }}">
+        {% endif %}
+      </label>
+      {% endfor %}
+    </div>
+    {% if c.fields | selectattr('advanced') | list %}
+    <details class="advanced">
+      <summary>Advanced options</summary>
+      <div class="grid">
+        {% for f in c.fields if f.advanced %}
+        <label>
+          {{ f.label }}{% if f.help %}<a class="help" data-tip="{{ f.help }}" tabindex="0">?</a>{% endif %}
+          {% set val = src.config.get(f.name, f.default) %}
+          {% if f.kind == 'select' %}
+            <select name="cfg_{{ c.type }}__{{ f.name }}">{% for o in f.options %}<option {{ 'selected' if val|string == o else '' }}>{{ o }}</option>{% endfor %}</select>
+          {% elif f.kind == 'bool' %}
+            <input type="checkbox" name="cfg_{{ c.type }}__{{ f.name }}" {{ 'checked' if src.config.get(f.name) else '' }}>
+          {% else %}
+            <input type="{{ 'password' if f.kind == 'secret' else ('number' if f.kind == 'number' else 'text') }}"
+                   name="cfg_{{ c.type }}__{{ f.name }}" value="{{ val }}" placeholder="{{ f.placeholder }}">
+          {% endif %}
+        </label>
+        {% endfor %}
+      </div>
+    </details>
+    {% endif %}
+    {% if not c.implemented %}
+    <p class="muted small" style="margin:10px 0 0">Credentials for preview connectors are used only to show
+      the form shape; production would read them from a secret manager.</p>
+    {% endif %}
+  </fieldset>
+  {% endfor %}
+
+  <fieldset class="preview-card">
+    <legend>Connection test</legend>
+    <button type="button" class="btn" id="probe-btn">{{ ui.icon('play') }} Test connection</button>
+    <div id="probe-out" class="probe-out muted">Not tested yet.</div>
+  </fieldset>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">{{ ui.icon('check') }} Save</button>
+    <a href="{{ url_for('sources') }}" class="btn">Cancel</a>
+  </div>
+</form>
+{% endblock %}

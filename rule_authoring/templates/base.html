@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}DQ Compass{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script>
+    try { var t = localStorage.getItem('dq-theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+  </script>
+</head>
+{% import "_ui.html" as ui %}
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="{{ url_for('index') }}">
+      <span class="brand-mark"></span>
+      <span class="brand-text">DQ&nbsp;Compass</span>
+    </a>
+    <nav class="nav">
+      <a href="{{ url_for('index') }}" class="{{ 'active' if active_nav == 'home' else '' }}">{{ ui.icon('home') }}<span>Home</span></a>
+      <a href="{{ url_for('catalogue') }}" class="{{ 'active' if active_nav == 'catalogue' else '' }}">{{ ui.icon('rules') }}<span>Catalogue</span></a>
+      <a href="{{ url_for('sources') }}" class="{{ 'active' if active_nav == 'sources' else '' }}">{{ ui.icon('database') }}<span>Data Sources</span></a>
+      <a href="{{ url_for('runs') }}" class="{{ 'active' if active_nav == 'runs' else '' }}">{{ ui.icon('box') }}<span>Runs</span></a>
+      <a href="{{ url_for('reporting') }}" class="{{ 'active' if active_nav == 'reporting' else '' }}">{{ ui.icon('chart') }}<span>Reporting</span></a>
+      <a href="{{ url_for('mapping_view') }}" class="{{ 'active' if active_nav == 'mapping' else '' }}">{{ ui.icon('scale') }}<span>Mapping</span></a>
+      <a href="{{ url_for('activity') }}" class="{{ 'active' if active_nav == 'activity' else '' }}">{{ ui.icon('activity') }}<span>Activity</span></a>
+      <a href="{{ url_for('docs') }}" class="{{ 'active' if active_nav == 'docs' else '' }}">{{ ui.icon('help') }}<span>Help</span></a>
+    </nav>
+    <div class="nav-foot">
+      <span class="muted small">MBA-ESG / SG GSC</span>
+      <span class="muted small">Datathon prototype</span>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn only-mobile" id="menuToggle" aria-label="Toggle menu">{{ ui.icon('menu') }}</button>
+      <div class="crumb">{% block crumb %}{% endblock %}</div>
+      <div class="topbar-right">
+        <form class="editor-form" action="{{ url_for('set_editor') }}" method="post" title="Name recorded in the audit log">
+          {{ ui.icon('user') }}
+          <input name="editor" value="{{ user if user != 'anonymous' else '' }}" placeholder="editor name">
+        </form>
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle light / dark">{{ ui.icon('theme') }}</button>
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flashes">
+        {% for cat, msg in messages %}
+        <div class="flash flash-{{ cat }}">
+          {{ ui.icon('check' if cat == 'success' else ('alert' if cat == 'error' else 'info')) }}
+          <span>{{ msg }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    <main class="content">{% block content %}{% endblock %}</main>
+  </div>
+  <div class="scrim" id="scrim"></div>
+</div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+<script src="{{ url_for('static', filename='form.js') }}"></script>
+<script src="{{ url_for('static', filename='source_form.js') }}"></script>
+</body>
+</html>
