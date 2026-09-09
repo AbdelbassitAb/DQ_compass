@@ -1,264 +1,229 @@
-# DQ Compass — Plug-and-play data quality control layer
+# DQ Compass
 
-MVP prototype answering the "MBA-ESG / SG GSC Datathon" use case: a generic,
-reusable and auditable data quality control layer, pluggable into any EUC
-without writing new code.
+**A plug-and-play data-quality control layer for End-User Computing (EUC) applications.**
 
-## Architecture (mapped onto the use case, section 4)
+Point it at a spreadsheet or a CSV export, describe the checks once in a catalogue, and
+get a reproducible quality score plus a tamper-evident audit trail on every run — without
+writing validation code for each new file.
 
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![Tests](https://img.shields.io/badge/tests-42%20passing-brightgreen)
+![Dependencies](https://img.shields.io/badge/runtime%20deps-pandas%20%C2%B7%20pyyaml%20%C2%B7%20flask-lightgrey)
+
+---
+
+## The problem
+
+Banks and large companies run critical numbers through **EUCs** — Excel workbooks, Access
+databases, local scripts maintained by business teams, outside the governed IT systems.
+They typically have no input validation, no audit trail, and no owner for data quality.
+Regulators (notably **BCBS 239** on risk-data aggregation) expect firms to inventory these
+tools and put controls around the material ones.
+
+Rebuilding every workbook as a proper system is not realistic. DQ Compass takes the other
+route: a **generic control layer you bolt on**, so an EUC reaches a governed standard with
+no bespoke project.
+
+## What it does
+
+Four layers, matching the lifecycle *define → execute → report → evidence*:
+
+| Layer | Component | Role |
+|---|---|---|
+| **1. Control Catalogue** | `control_catalogue.csv` + `rule_authoring/` web app | One row per rule. Parameters drive behaviour — **no rule logic in code**. Every rule is validated before it is saved. |
+| **2. DQ Engine** | `dq_engine.py` + `controls.py` | Reads the catalogue, loads each source through a connector, dispatches by control type, applies tolerance thresholds. |
+| **3. Reporting Layer** | `reporting/scorecard.py` + `mapping.py` | Severity-weighted composite score, coverage matrix, trend, alerts, and a supervisory-requirement mapping — all as Power BI–ready CSV. |
+| **4. Audit Layer** | `evidence/<run_id>/` + hash-chained ledgers | A complete **Evidence Pack** per run: input snapshots, config snapshot, results, exceptions, logs, hashes. Independently re-verifiable. |
+
+### The six data-quality dimensions
+
+Each is one generic function in `controls.py` with the signature `fn(df, **params) → {status, metrics, exceptions}`:
+
+| Dimension | Checks | Key parameters |
+|---|---|---|
+| **Completeness** | a field is populated | `field` |
+| **Validity** | values match an allowed set, a regex, or a numeric range | `field` + one of `allowed_values` / `regex` / `range` |
+| **Uniqueness** | no duplicate rows on a key | `keys` |
+| **Consistency** | values reconcile against a reference table | `field`, `ref_field` (+ reference dataset) |
+| **Timeliness** | data is not older than a lag threshold | `field`, `max_lag_days` |
+| **Reconciliation** | amounts agree between two sources within a tolerance | `key`, `field`, `ref_field`, `tolerance_pct` (+ reference dataset) |
+
+The functions take **only column names**. The same `check_completeness` serves any field of
+any dataset — that is what makes the layer reusable.
+
+---
+
+## Quickstart
+
+```bash
+git clone https://github.com/AbdelbassitAb/DQ_compass.git
+cd DQ_compass
+pip install -r requirements.txt
+
+# 1. load a demo catalogue: 5 data sources + 14 rules across all 6 dimensions,
+#    each with an explicit passing and failing case
+python demo_seed.py
+
+# 2. run the engine — writes evidence/<run_id>/
+python dq_engine.py
+
+# 3. build the reporting files from the latest run
+python reporting/scorecard.py latest
+
+# 4. explore everything in the browser
+python run_authoring.py            # http://127.0.0.1:5001
 ```
-control_catalogue.csv          -> [1] Control Catalogue   (DEFINES)
-rule_authoring/  (web app)     -> catalogue + data source authoring & validation
-connectors.py                  -> data source connector abstraction (CSV, Excel, ...)
-datasets_config.yaml           -> data source registry (separation of concerns)
-controls.py + dq_engine.py     -> [2] Data Quality Engine  (EXECUTES)
-reporting/scorecard.py + mapping.py -> [3] Reporting Layer (REPORTS + Appendix C)
-evidence/<run_id>/...           -> [4] Audit Layer         (EVIDENCES, Appendix B)
-evidence/runs_ledger.jsonl     -> hash-chained run history
-catalogue_changelog.jsonl      -> catalogue audit log (append-only, hash-chained)
-data_sources_changelog.jsonl   -> data source audit log (append-only, hash-chained)
-cli.py (`dqcompass`)           -> the same capabilities for a pipeline / CI
-```
 
-Definition -> Execution -> Reporting -> Audit: the 4 lifecycle stages required
-by the brief are covered end to end. See `docs/ARCHITECTURE.md` and
-`docs/DEPLOYMENT.md`.
+The web app has a sidebar with: **Home** (health dashboard), **Catalogue** (create/edit
+rules with live validation), **Data Sources**, **Runs** (per-run Evidence Pack, *Verify*,
+*Sign-off*), **Reporting**, **Mapping** (supervisory view), and **Activity** (audit
+timeline).
 
-## Audit Layer — Evidence Pack per run (Appendix B)
-
-`dq_engine.py` writes `evidence/<run_id>/`:
-
-| File | Appendix B.2 component |
-|---|---|
-| `run_summary.json` | run id, timestamps, catalogue/config hashes, per-rule results, `run_hash` chained from the previous run |
-| `<rule>_result.json` | status, metrics, **rule config snapshot**, **resolved execution parameters**, dataset hashes |
-| `<rule>_exceptions.csv` | detailed failing records |
-| `snapshots/<name>.csv` | an exact copy of every input dataset used |
-| `system_trace.json` | engine / Python / library versions, host, file hashes, control function per rule |
-| `run_log.jsonl` + `run.log` | ordered processing steps |
-| `verification.json` | written by `dqcompass verify <run_id>` |
-| `signoff.json` | written from the Runs page |
-
-`evidence/runs_ledger.jsonl` chains every run (`previous_run_hash -> run_hash`),
-so the run history is append-only and tamper-evident.
-
-**Independent verification** (section 7.3): `dqcompass verify <run_id>`
-re-executes the stored rule configuration against the stored dataset snapshots
-and asserts identical status + exception counts.
-
-## Reporting Layer (section 4.3, Appendix C)
-
-`reporting/scorecard.py` writes, from the latest run:
-`scorecard.csv` / `.html`, `exceptions_detail.csv`, `coverage.csv`,
-`exception_summary.csv`, `dataset_score.csv` (severity-weighted composite),
-`trend.csv` (from the ledger), `alerts.json` (failing High-severity controls +
-remediation action).
-
-`mapping.py` writes `supervisory_mapping.csv` — Appendix C.2/C.3:
-Requirement -> Control -> Evidence -> Output -> last run (id + hash), with the
-requirement taken from each rule's `regulatory_ref` (default per DQ dimension).
-
-The web app surfaces all of this: **Runs** (run history, per-run drill-down,
-verify + sign-off, embedded reporting) and **Mapping** (the Appendix C table).
-
-## `dqcompass` CLI
+### Or use the CLI
 
 ```bash
 pip install -e .
-dqcompass run                     # execute, write the Evidence Pack
-dqcompass verify <run_id>         # prove a past run is reproducible
-dqcompass report                  # (re)generate the Reporting Layer files
-dqcompass mapping                 # write reporting/supervisory_mapping.csv
-dqcompass catalogue-validate      # validate every rule (exit 1 on error)
-dqcompass gate --severity High    # run + exit 1 if a High-severity control broke (CI)
-dqcompass serve                   # start the web app
+
+dqcompass run                    # execute, write the Evidence Pack
+dqcompass verify <run_id>        # prove a past run reproduces exactly
+dqcompass report                 # (re)generate the Reporting Layer files
+dqcompass mapping                # write the supervisory mapping
+dqcompass catalogue-validate     # validate every rule   (exit 1 on error)
+dqcompass gate --severity High   # run + exit 1 if a High-severity control broke (CI)
+dqcompass serve                  # start the web app
 ```
+
+---
 
 ## How it works
 
-1. `control_catalogue.csv` has one column per Appendix A.2 attribute (Rule ID,
-   Control Name, Control Type, Description, Logic Definition, Dataset Scope,
-   Data Element, Threshold, Severity, Frequency, Owner, Output Type, KPI,
-   Remediation Action) + technical columns: `ref_dataset_scope`, `params`
-   (generated JSON: fields, thresholds, allowed values…), `threshold_pct`,
-   `active`, `created_at`, `updated_at`. `logic_definition`, `data_element`
-   and `threshold` are **generated** on save by the authoring interface (see
-   below).
-2. `datasets_config.yaml` declares where to find each dataset. This file is
-   what makes the brief's "Separation of Concerns" principle real: the engine
-   never knows *where* the data is until it is told.
-3. `dq_engine.py` reads the catalogue row by row, loads the required
-   datasets, calls the generic function matching the `control_type` (in
-   `controls.py`), and writes a complete Evidence Pack per run in
-   `evidence/<run_id>/`.
-4. `reporting/scorecard.py` turns the latest run into a traffic-light
-   scorecard (CSV for Power BI + HTML for a quick demo) and a consolidated
-   exceptions view with record-by-record drill-down.
-
-## Catalogue authoring interface (`rule_authoring/`)
-
-A local web app to **create and edit the business rules without editing the
-CSV by hand**, with a dedicated validation engine — a "catalogue of rules
-that validates the rules".
-
-```bash
-pip install -r requirements.txt
-python migrate_catalogue.py     # once: brings the CSV to the 20-column schema
-python migrate_sources.py       # once: rich per-source datasets_config.yaml
-python run_authoring.py         # http://127.0.0.1:5001
+```
+control_catalogue.csv ──┐
+                        ├─► DQEngine ──► for each active rule:
+datasets_config.yaml ───┘                  load source (connectors.py)
+   (where each source lives)                hash + snapshot the exact input
+                                            run controls.py function by control_type
+                                            apply threshold_pct
+                                            │
+                                            ├─► evidence/<run_id>/   (Audit Layer)
+                                            └─► reporting/*.csv      (Reporting Layer)
 ```
 
-App shell — a sidebar with eight sections:
+1. **`control_catalogue.csv`** holds one column per governance attribute (control name,
+   type, description, logic definition, dataset scope, data element, threshold, severity,
+   frequency, owner, output type, KPI, remediation, regulatory reference) plus technical
+   columns (`params` JSON, `threshold_pct`, `active`, timestamps). The human-readable
+   `logic_definition` (a neutral pseudo-SQL), `data_element` and `threshold` text are
+   **generated** from the form when a rule is saved.
+2. **`datasets_config.yaml`** declares where each dataset lives (connector type, status,
+   config). The engine never knows *where* the data is until it is told — sources and rules
+   evolve independently.
+3. **`dq_engine.py`** walks the catalogue, skips `active = FALSE` rows, and for each rule
+   applies `threshold_pct`: if the anomaly rate stays under the threshold the control
+   passes and is flagged `within_threshold`.
+4. **`reporting/scorecard.py`** turns the latest run into a traffic-light scorecard (CSV +
+   a standalone HTML page) and a record-by-record exceptions view. **`mapping.py`** derives
+   the supervisory table: *requirement → control → evidence → last run (id + hash)*.
 
-| Section | What it shows |
+## The audit layer
+
+The differentiator. Every run produces `evidence/<run_id>/` with:
+
+| File | Contents |
 |---|---|
-| **Home** | dashboard: rule/source health tiles, latest engine run (pass/fail/error donut), a "needs attention" list (validation errors, probe failures, retired sources with live dependents), the coverage heatmap, recent activity |
-| **Catalogue** | the rules as filterable list items (search + state + control-type chips), each expandable to its logic, issues, owner/KPI/remediation |
-| **Data Sources** | one card per source: connector, status, plain-language summary, "used by" rule chips, retire / reactivate / rename / purge |
-| **Runs** | run history + per-run Evidence Pack drill-down, Verify this run, sign-off |
-| **Reporting** | cross-run analytics with an audience filter (All / Control owners & risk / Data engineers): composite DQ score + trend, dataset-health ranking, 3-state coverage matrix, open High-severity issues, exceptions by owner / dimension / rule, rule-reliability, run-over-run diff. Dependency-free inline-SVG charts; Power-BI-ready downloads |
-| **Mapping** | the Appendix C.2/C.3 supervisory mapping + the C.4 principles |
-| **Activity** | unified append-only audit timeline across the catalogue and the data source registry |
-| **Help** | field reference (`/docs`) |
+| `run_summary.json` | run id, timestamps, catalogue/config hashes, per-rule results, and `run_hash` |
+| `<rule>_result.json` | status, metrics, **frozen rule-config snapshot**, resolved execution parameters, dataset hashes |
+| `<rule>_exceptions.csv` | the failing rows |
+| `snapshots/<name>.csv` | a byte-exact copy of every input dataset used |
+| `system_trace.json` | engine / Python / library versions, host, file hashes, control function per rule |
+| `run_log.jsonl` + `run.log` | ordered processing steps |
+| `verification.json` | written by `dqcompass verify` — see below |
+| `signoff.json` | written from the Runs page — reviewer, timestamp, decision, comment |
 
-Light / dark theme toggle in the top bar (persisted in `localStorage`).
+**Hash chain.** `run_hash = sha256(previous_run_hash + canonical_json(run_summary))[:16]`,
+appended to `evidence/runs_ledger.jsonl`. Change one byte in an old run and its hash — and
+every run after it — no longer matches. The run history is append-only and tamper-evident.
+The catalogue and data-source change logs are chained the same way.
 
-What it brings:
+**Independent verification.** `dqcompass verify <run_id>` re-executes the *stored* rule
+config against the *stored* snapshots and asserts the status and exception count are
+identical. An auditor can re-derive the result from the folder alone, with no access to
+your environment or live data.
 
-- **Dynamic form per control type**: the parameters shown adapt to the chosen
-  `control_type` (field, keys, ref_field, regex, min/max, max_lag_days,
-  tolerance_pct…). The user never types JSON; the engine's `params` field is
-  generated.
-- **Contextual help**: required fields marked `*`, a `?` icon on hover of each
-  field (tooltip) linked to a **documentation page** (`/docs`) that details
-  the 14 attributes, the 6 control types and their parameters, the meaning of
-  each `output_type` / `severity` / `frequency`, the tolerance threshold and
-  the validation rules.
-- **Validation before saving** (`rule_authoring/schema.py`), at two levels:
-  - *blocking errors*: unique and well-formed Rule ID, required fields,
-    controlled vocabularies (type, severity, frequency), `dataset_scope`
-    declared in `datasets_config.yaml`, **columns actually present in the
-    target dataset** (checked on a sample), param consistency per type (e.g.
-    Validity = exactly one criterion among list / regex / range; a regex that
-    compiles; `tolerance_pct` in [0, 100]…);
-  - *warnings*: critical control at low frequency, logic duplicated with an
-    existing rule, high tolerance threshold on a High control, self-reference,
-    overly permissive regex…
-- **Generated auditor-readable columns** (Appendix A.2): `logic_definition`
-  (pseudo-SQL), `data_element`, `threshold`, + a plain-language explanation —
-  shown as a live preview in the form.
-- **Coverage matrix** datasets × 6 DQ dimensions (the brief's "control
-  coverage view", 4.3) + catalogue health indicators.
-- **Catalogue audit log** (`catalogue_changelog.jsonl`, append-only): every
-  create / update / delete / (de)activate is tracked with the editor, the
-  timestamp, the before/after and the **SHA-256 hash of the catalogue before
-  and after**. The catalogue state at any past date is reconstructible —
-  governance and auditability (Appendix C).
-- **Deactivation without deletion** (`active=FALSE`): a rule removed from the
-  execution scope stays in the catalogue and the history.
+**Sign-off.** A named person records a review decision (`acknowledged` / `accepted` /
+`rejected` + a comment) on a run. The machine says the numbers are real; the human says who
+accepts them.
 
-The engine (`dq_engine.py`) consumes the same CSV: it skips `active=FALSE`
-rules and applies the `threshold_pct` column (if the anomaly rate stays below
-the threshold, the control passes and is marked `within_threshold`).
+---
 
-## Data sources (`connectors.py` + the "Data Sources" page)
+## Project layout
 
-Each rule targets a named data source declared on the **Data Sources** page and
-stored in `datasets_config.yaml` with a connector `type`, a `status` and a
-connector-specific `config`.
+```
+control_catalogue.csv        the rules (one row each)
+datasets_config.yaml         the data-source registry
+controls.py                  6 generic control functions + CONTROL_REGISTRY
+dq_engine.py                 the engine + verify_run()
+mapping.py                   supervisory-requirement mapping
+cli.py                       the `dqcompass` command
+demo_seed.py                 loads a full demo catalogue + sample sources
 
-| Connector | Status | Config |
-|---|---|---|
-| **CSV file** | implemented | `path`, `delimiter` (incl. `\t`), `header_row`, encoding, quotechar, skip_rows |
-| **Excel file** | implemented | `path`, `sheet`, `header_row`, skip_rows, nrows (needs `openpyxl`) |
-| **JSON file** | preview | `path`, `orient`, `lines`, `record_path` |
-| **SQL database** | preview | `driver`, `host`, `port`, `database`, `schema`, `username`, `password`, `table` / `query` |
-| **SharePoint / Drive / URL** | preview | `url`, `auth`, `token`, `format` |
+rule_authoring/              Flask app: catalogue & source authoring, runs, reporting
+  schema.py                    ~30 validation checks run before a rule is saved
+  store.py / source_store.py   persistence + hash-chained change logs
+  charts.py                    dependency-free inline-SVG charts
+reporting/scorecard.py       scorecard, coverage, dataset score, trend, alerts
+connectors.py                connector abstraction (CSV, Excel; JSON/SQL/URL preview)
 
-*Preview* connectors show the full field form (for the demo) but do not run:
-they are saved with `status: preview` and skipped by the engine. Credentials on
-preview connectors are used only to render the form shape.
-
-The "New data source" form has a connector picker, progressive fields (advanced
-options collapsed), and a **Test connection** button that previews the detected
-columns and first rows — the same probe the catalogue validation uses to check
-that a rule cannot reference a column its source does not expose.
-
-**Delete policy** (data source audit log records every step, hash-chained):
-
-- **Retire** — reversible soft delete. `status -> retired`; dependent rules are
-  auto-deactivated and can be brought back with one click.
-- **Purge** — permanent removal from the registry (typed `PURGE` confirmation).
-  Dependent rule *definitions* are never deleted, only deactivated.
-- **Rename** — rewrites `dataset_scope` / `ref_dataset_scope` on every dependent
-  rule in one logged transaction.
-- A rule pointing at a missing / retired source **does not crash the run**: it
-  produces a `status: ERROR` record in the evidence pack and execution
-  continues.
-
-`migrate_sources.py` brings a flat legacy `datasets_config.yaml` to the rich
-per-source schema (the engine reads both).
-
-Tests: `python tests/test_schema.py`, `python tests/test_connectors.py`,
-`python tests/test_engine.py` (or `python -m pytest tests/`).
-
-## Why it is scalable / plug-and-play
-
-- **Add a new dataset (new EUC)**: register it on the Data Sources page (CSV /
-  Excel / …). Zero lines of code changed. A new *connector type* is one class
-  in `connectors.py`.
-- **Add a new rule on an existing dataset**: one line in
-  `control_catalogue.csv`. Zero lines of code changed.
-- **Add a new control type** (rare): one function in `controls.py` + one
-  entry in `CONTROL_REGISTRY`. The engine, the reporting and the audit do not
-  change.
-- The 6 functions in `controls.py` are **fully generic**: none knows the name
-  of a dataset or a project, only column names passed as parameters. The same
-  `check_completeness` serves any field of any dataset, indefinitely.
-
-## Why it is auditable (Appendix B and C of the brief)
-
-Every execution generates, with no manual intervention:
-- a unique `run_id` and a UTC timestamp
-- a SHA-256 hash of the exact content of each dataset used (proof that the
-  data was not modified between execution and review)
-- a full snapshot of the rule configuration used (params, thresholds,
-  dataset scope)
-- the result metrics (pass/fail + quantifiable KPIs)
-- the detail of the failing records, exported as CSV
-
-Two successive runs on the same data produce identical dataset hashes and the
-same results: execution is **reproducible**, a condition explicitly required
-by the brief (sections 7.1 and 7.3).
-
-## Running
-
-```bash
-pip install pandas pyyaml
-python dq_engine.py                  # runs the rules, generates the evidence pack
-python reporting/scorecard.py        # generates scorecard.csv / .html / exceptions_detail.csv
+sample_data/                 demo datasets (incl. a ~78k-row BIS derivatives extract)
+evidence/                    Evidence Packs from example runs + runs_ledger.jsonl
+tests/                       42 tests (schema, connectors, controls, engine)
+docs/ARCHITECTURE.md         design & data flow
+docs/DEPLOYMENT.md           cron / Airflow / CI-gate / notifications
+docs/build_*.py|js           generators for the datathon slide decks & PDFs (optional)
 ```
 
-## Known limitations (to mention in the documentation/presentation)
+## Tests
 
-- CSV loading only in this prototype; plugging Excel/SQL/Alteryx output only
-  needs a new `format` in `_load_dataset()` (planned extension, not a
-  rewrite).
-- Evidence storage is local (files); in production, `run_dir` would point to
-  versioned storage (S3, data lake) for regulatory retention.
-- The traffic-light scoring is currently binary (pass/fail per rule); a V2
-  could compute a weighted composite score per dataset from severity and
-  exception rate.
-- No built-in scheduler (the catalogue's Frequency is declarative); in
-  production, `dq_engine.py` would be called by an orchestrator (cron,
-  Airflow).
+No pytest required — each file has a plain runner:
 
-## Sample dataset
+```bash
+python tests/test_schema.py        # 21  meta-catalogue validation
+python tests/test_connectors.py    # 11  connector config validation
+python tests/test_controls.py      #  4  control-function edge cases
+python tests/test_engine.py        #  6  evidence pack, ledger chain, verify, thresholds
+```
 
-`sample_data/orders.csv`, `sample_data/orders_reference.csv` and
-`sample_data/customers.csv` simulate an EUC export of orders with deliberate
-anomalies (missing amount, invalid status, duplicate, orphan customer, stale
-order, reconciliation break) to demonstrate that the 6 dimensions do catch
-real cases.
-#   D Q _ c o m p a s s  
- 
+`python -m pytest tests/` also works if pytest is installed.
+
+## Tech stack & design decisions
+
+- **Python 3.10+, pandas, PyYAML, Flask.** No database, no build step, no JS framework —
+  the web app is server-rendered Jinja with a design-token stylesheet and one small
+  vanilla-JS file; charts are inline SVG generated in Python. Clone and run.
+- **Rules are data, the engine is generic.** Adding a rule is one CSV row; adding a data
+  source is one registry entry; neither touches engine code. A new control type is one
+  function plus one registry entry.
+- **Neutral pseudo-SQL** in `logic_definition` (`regexp_matches`, `INTERVAL`, `NULLIF`) so
+  the pandas execution in `controls.py` can later be swapped for a push-down backend
+  (DuckDB / Spark) behind the same function signatures, with the catalogue, evidence
+  format and reporting unchanged.
+- **Everything auditable by construction** — no manual step produces the run id, the
+  hashes, the snapshots or the config freeze.
+
+## Limitations & roadmap
+
+- Connectors implemented: **CSV and Excel**. JSON / SQL / SharePoint appear in the UI as
+  selectors and are saved with `status: preview`; the engine skips them.
+- Evidence is stored as local files. In production `evidence/` would point at versioned
+  WORM storage (S3 Object Lock / immutable data-lake prefix); the engine already records
+  this intent in `system_trace.json`.
+- The engine runs rules sequentially with pandas in memory. The path to volume is the
+  push-down backend described above.
+- No built-in scheduler — `dqcompass run` is designed to be called by cron / Airflow
+  (see `docs/DEPLOYMENT.md`).
+
+---
+
+<sub>Built for the MBA-ESG / SG GSC Datathon 2026 use case *“DQ Compass: building a
+plug-and-play data quality control layer for EUCs.”* The `docs/build_*` scripts and the
+generated decks are specific to that presentation and are not part of the product.</sub>

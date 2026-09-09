@@ -1,7 +1,12 @@
-# Python build noise only - regenerated automatically, never needed for a demo.
+# Python build noise - regenerated automatically.
 __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
 build/
 dist/
+
+# Generated presentation material - rebuild with docs/build_*.py|js
+docs/*.pdf
+docs/*.pptx
+node_modules/
