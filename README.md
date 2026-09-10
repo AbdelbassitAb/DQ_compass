@@ -10,6 +10,8 @@ writing validation code for each new file.
 ![Tests](https://img.shields.io/badge/tests-42%20passing-brightgreen)
 ![Dependencies](https://img.shields.io/badge/runtime%20deps-pandas%20%C2%B7%20pyyaml%20%C2%B7%20flask-lightgrey)
 
+![Home dashboard](docs/screenshots/home.png)
+
 ---
 
 ## The problem
@@ -34,6 +36,10 @@ Four layers, matching the lifecycle *define → execute → report → evidence*
 | **2. DQ Engine** | `dq_engine.py` + `controls.py` | Reads the catalogue, loads each source through a connector, dispatches by control type, applies tolerance thresholds. |
 | **3. Reporting Layer** | `reporting/scorecard.py` + `mapping.py` | Severity-weighted composite score, coverage matrix, trend, alerts, and a supervisory-requirement mapping — all as Power BI–ready CSV. |
 | **4. Audit Layer** | `evidence/<run_id>/` + hash-chained ledgers | A complete **Evidence Pack** per run: input snapshots, config snapshot, results, exceptions, logs, hashes. Independently re-verifiable. |
+
+![Control Catalogue](docs/screenshots/catalogue.png)
+
+*The catalogue: 14 demo rules across the six dimensions, each validated before it is saved, with a datasets × dimensions coverage matrix.*
 
 ### The six data-quality dimensions
 
@@ -125,7 +131,19 @@ datasets_config.yaml ───┘                  load source (connectors.py)
    a standalone HTML page) and a record-by-record exceptions view. **`mapping.py`** derives
    the supervisory table: *requirement → control → evidence → last run (id + hash)*.
 
+![Reporting & analytics](docs/screenshots/reporting.png)
+
+*Reporting is run-selectable: composite score and trend, dataset-health ranking,
+a coverage matrix, open High-severity issues with remediation, exceptions by
+owner — all downloadable as Power BI–ready CSV.*
+
 ## The audit layer
+
+![Run detail — Evidence Pack](docs/screenshots/run-detail.png)
+
+*One run: the Evidence Pack (run hash, previous-run hash, catalogue hash, input
+snapshots), a `reproducible` badge from independent re-execution, every control's
+result and exception count, and the run's own reporting slice.*
 
 The differentiator. Every run produces `evidence/<run_id>/` with:
 
@@ -153,6 +171,15 @@ your environment or live data.
 **Sign-off.** A named person records a review decision (`acknowledged` / `accepted` /
 `rejected` + a comment) on a run. The machine says the numbers are real; the human says who
 accepts them.
+
+**Supervisory mapping.** `mapping.py` derives, from the catalogue, a table linking each
+control to the regulatory requirement it satisfies, the evidence it produces, and its last
+evidenced run (id + hash).
+
+![Supervisory mapping](docs/screenshots/mapping.png)
+
+More views: [`docs/screenshots/`](docs/screenshots) also has the Runs list and the Data
+Sources registry.
 
 ---
 
