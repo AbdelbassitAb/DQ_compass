@@ -4,7 +4,7 @@
 {% block crumb %}<b>Runs</b>{% endblock %}
 {% block content %}
 
-{% call ui.page_header('Engine Runs', 'Every execution is an Evidence Pack (Appendix B): run id, timestamps, dataset snapshots, rule config, metrics, exceptions, logs and system trace. The run ledger chains each run to the previous one.') %}
+{% call ui.page_header('Engine Runs', 'Every execution is an Evidence Pack: run id, timestamps, dataset snapshots, rule config, metrics, exceptions, logs and system trace. The run ledger chains each run to the previous one.') %}
   <a href="{{ url_for('activity') }}" class="btn btn-ghost">{{ ui.icon('activity') }} Activity</a>
   <form method="post" action="{{ url_for('run_now') }}" style="display:inline">
     <button class="btn btn-primary">{{ ui.icon('refresh') }} Run engine now</button>

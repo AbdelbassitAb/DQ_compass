@@ -6,7 +6,7 @@ The "meta-catalogue": the set of rules that validates the business rules.
 This module performs NO I/O. It exposes:
   - the controlled vocabularies (control types, severities, frequencies...)
   - validate_rule(...) -> ValidationReport : blocking errors + warnings
-  - derivation helpers that produce the auditor-readable columns of Appendix
+  - derivation helpers that produce the auditor-readable catalogue
     A.2 (logic_definition, data_element, threshold) and a plain-language
     explanation, from the technical configuration.
 
@@ -95,7 +95,7 @@ FIELD_HELP = {
                           "E.g. \"Contact the source owner\".",
     "regulatory_ref": "Optional. Supervisory requirement this control satisfies "
                       "(e.g. a BCBS 239 principle). Feeds the auto-generated Supervisory "
-                      "Mapping (Appendix C). Left blank, a default is derived from the DQ dimension.",
+                      "Mapping. Left blank, a default is derived from the DQ dimension.",
     "dataset_scope": "Dataset the rule applies to. Must be declared in datasets_config.yaml.",
     "ref_dataset_scope": "Reference dataset. Required for Consistency (referential integrity) "
                          "and Reconciliation (matching).",
@@ -479,7 +479,7 @@ def validate_rule(rule: dict, existing_rules: list, datasets_config: dict,
 
 
 # --------------------------------------------------------------------------
-# Derivation of the auditor-readable columns (Appendix A.2)
+# Derivation of the auditor-readable columns
 # --------------------------------------------------------------------------
 def derive_data_element(control_type: str, params: dict) -> str:
     if control_type == "Uniqueness":

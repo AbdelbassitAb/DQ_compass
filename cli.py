@@ -3,9 +3,9 @@ cli.py — the `dqcompass` command line.
 
     dqcompass run                    execute the catalogue, write an Evidence Pack
     dqcompass verify <run_id>        re-execute a past run from its snapshots and
-                                     assert identical results (Appendix B.3)
+                                     assert identical results
     dqcompass report                 (re)generate the Reporting Layer outputs
-    dqcompass mapping                write reporting/supervisory_mapping.csv (Appendix C)
+    dqcompass mapping                write reporting/supervisory_mapping.csv
     dqcompass catalogue-validate     validate every rule against the meta-catalogue
     dqcompass gate [--severity High] run + fail (exit 1) if any control at/above
                                      that severity broke -- for CI pipelines

@@ -1,6 +1,6 @@
 # DQ Compass — architecture & design
 
-## 1. The four layers (brief section 4)
+## 1. The four layers
 
 ```
                          ┌───────────────────────────────────────────────┐
@@ -56,9 +56,9 @@ the audit trails. `cli.py` (`dqcompass`) is the same capabilities for a pipeline
 
 `dqcompass verify <run_id>` re-executes step 2 from the **stored config and
 stored snapshots** and asserts status + exception counts are unchanged
-(Appendix B.3, section 7.3).
+(independent verification).
 
-## 3. Evidence Pack — Appendix B.2 coverage
+## 3. Evidence Pack — contents
 
 | B.2 component | Where |
 |---|---|
@@ -86,7 +86,7 @@ stored snapshots** and asserts status + exception counts are unchanged
   rename (retargets `dataset_scope` on dependent rules in one logged transaction).
 - **Run history** — `runs_ledger.jsonl` chains every run; a rule pointing at a
   missing/retired source yields a `status: ERROR` record and the run continues.
-- **Supervisory mapping** — `mapping.py` generates the Appendix C.2/C.3 table
+- **Supervisory mapping** — `mapping.py` generates the supervisory-requirement table
   (Requirement → Control → Evidence → Output → last run + hash) from the
   catalogue's `regulatory_ref` column (default per dimension when blank).
 

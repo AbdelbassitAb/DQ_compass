@@ -4,7 +4,7 @@ rule_authoring/store.py
 Persistence of the Control Catalogue + catalogue audit log.
 
 - The catalogue is a CSV with canonical columns: the 14 mandatory attributes of
-  Appendix A.2 + technical columns (ref_dataset_scope, params JSON, threshold_pct,
+  canonical attributes + technical columns (ref_dataset_scope, params JSON, threshold_pct,
   active, timestamps).
 - Every create / update / delete / (de)activate is journalled in
   catalogue_changelog.jsonl (append-only), with the before/after and the hash of
@@ -21,7 +21,7 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-# The 14 mandatory attributes (Appendix A.2) ... then the technical columns.
+# The 14 canonical attributes ... then the technical columns.
 CANONICAL_COLUMNS = [
     "rule_id", "control_name", "control_type", "description", "logic_definition",
     "dataset_scope", "data_element", "threshold", "severity", "frequency",

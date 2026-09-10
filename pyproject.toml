@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "dq-compass"
 version = "1.0.0"
-description = "Plug-and-play data quality control layer for EUCs (MBA-ESG / SG GSC Datathon)"
+description = "Plug-and-play data quality control layer for End-User Computing (EUC) applications"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["pandas", "pyyaml", "flask", "openpyxl"]

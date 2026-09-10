@@ -6,6 +6,9 @@ Point it at a spreadsheet or a CSV export, describe the checks once in a catalog
 get a reproducible quality score plus a tamper-evident audit trail on every run — without
 writing validation code for each new file.
 
+*A personal project, exploring what data-quality governance for EUCs looks like when it is
+built end to end.*
+
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Tests](https://img.shields.io/badge/tests-42%20passing-brightgreen)
 ![Dependencies](https://img.shields.io/badge/runtime%20deps-pandas%20%C2%B7%20pyyaml%20%C2%B7%20flask-lightgrey)
@@ -206,7 +209,7 @@ evidence/                    Evidence Packs from example runs + runs_ledger.json
 tests/                       42 tests (schema, connectors, controls, engine)
 docs/ARCHITECTURE.md         design & data flow
 docs/DEPLOYMENT.md           cron / Airflow / CI-gate / notifications
-docs/build_*.py|js           generators for the datathon slide decks & PDFs (optional)
+docs/screenshots/            web-app screenshots used in this README
 ```
 
 ## Tests
@@ -251,6 +254,6 @@ python tests/test_engine.py        #  6  evidence pack, ledger chain, verify, th
 
 ---
 
-<sub>Built for the MBA-ESG / SG GSC Datathon 2026 use case *“DQ Compass: building a
-plug-and-play data quality control layer for EUCs.”* The `docs/build_*` scripts and the
-generated decks are specific to that presentation and are not part of the product.</sub>
+<sub>A personal project, built to explore what a reusable data-quality control layer for
+EUCs looks like end to end — catalogue, engine, reporting and a tamper-evident audit
+trail. Not affiliated with any company; all sample data is public or synthetic.</sub>

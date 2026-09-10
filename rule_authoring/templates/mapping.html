@@ -4,7 +4,7 @@
 {% block crumb %}<b>Supervisory Mapping</b>{% endblock %}
 {% block content %}
 
-{% call ui.page_header('Supervisory Mapping', 'Appendix C — generated from the catalogue: each control mapped to the supervisory requirement it satisfies, the evidence it produces and its last execution.') %}
+{% call ui.page_header('Supervisory Mapping', 'Generated from the catalogue: each control mapped to the supervisory requirement it satisfies, the evidence it produces and its last execution.') %}
   <a href="{{ url_for('download_mapping') }}" class="btn btn-primary">{{ ui.icon('download') }} supervisory_mapping.csv</a>
 {% endcall %}
 

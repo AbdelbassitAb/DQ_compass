@@ -1,14 +1,14 @@
 """
 scorecard.py
 
-Reporting Layer (section 4.3 of the use case).
+Reporting Layer.
 
 Reads the latest run_summary.json from the Audit layer and produces, in
 reporting/ :
   - scorecard.csv          traffic-light table (Power BI / Excel)
   - scorecard.html         standalone scorecard for a quick demo
-  - exceptions_detail.csv   record-by-record drill-down (4.3)
-  - coverage.csv            datasets x dimensions control coverage view (4.3)
+  - exceptions_detail.csv   record-by-record drill-down
+  - coverage.csv            datasets x dimensions control coverage view
   - exception_summary.csv   exceptions grouped by severity / owner / type / dataset
   - dataset_score.csv       composite DQ score per dataset (severity-weighted)
   - trend.csv               pass / fail / error per run, from the run ledger

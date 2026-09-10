@@ -1,15 +1,15 @@
 """
 dq_engine.py
 
-Central engine that executes the DQ controls (the brief's "Data Quality Engine").
+Central engine that executes the DQ controls.
 
-Responsibilities (section 4.1 of the use case):
+Responsibilities:
   - execute multiple control types
   - apply the rules dynamically, whatever the dataset
   - produce structured, reproducible outputs
-  - generate a complete Evidence Pack per run (Appendix B)
+  - generate a complete Evidence Pack per run
 
-Per run, evidence/<run_id>/ holds (Appendix B.2):
+Per run, evidence/<run_id>/ holds:
   - run_summary.json     : run id, timestamps, catalogue/config hashes, per-rule
                            results, and a hash chained from the previous run
   - <rule>_result.json   : per-rule status, metrics, config snapshot, resolved
@@ -26,7 +26,7 @@ so the run history is append-only and tamper-evident.
 Run:   python dq_engine.py
 Verify:python dq_engine.py --verify <run_id>
        (re-executes the stored rule config against the stored dataset
-        snapshots and asserts identical results -- Appendix B.3 / section 7.3)
+        snapshots and asserts identical results)
 """
 from __future__ import annotations
 import ast
@@ -112,7 +112,7 @@ def _apply_threshold(outcome: dict, threshold_pct) -> dict:
 
 
 def _resolve_execution_parameters(control_type: str, params: dict, threshold_pct) -> dict:
-    """The effective parameters actually applied (Appendix B.2 'Execution Parameters')."""
+    """The effective parameters actually applied ('Execution Parameters' in the pack)."""
     resolved = dict(params)
     resolved["threshold_pct"] = threshold_pct
     if control_type == "Timeliness":
@@ -242,7 +242,7 @@ class DQEngine:
     def _error_record(self, rule: pd.Series, run_id: str, run_ts: str,
                       run_dir: Path, message: str) -> dict:
         """A rule whose data source / control type is unavailable does not crash the
-        run: it produces an ERROR record and execution continues (section 7.3)."""
+        run: it produces an ERROR record and execution continues."""
         record = {
             "run_id": run_id,
             "execution_timestamp_utc": run_ts,
@@ -389,7 +389,7 @@ class DQEngine:
 
 
 # --------------------------------------------------------------------------
-# Independent verification (section 7.3 / Appendix B.3)
+# Independent verification
 # --------------------------------------------------------------------------
 def _read_snapshot(path) -> pd.DataFrame:
     """Read a dataset snapshot the SAME way the engine reads a CSV source

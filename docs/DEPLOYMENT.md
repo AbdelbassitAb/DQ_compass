@@ -15,7 +15,7 @@ pip install -r requirements.txt
 | `dqcompass run` | execute the catalogue, write `evidence/<run_id>/` |
 | `dqcompass verify <run_id>` | re-execute a past run from its snapshots, assert identical results |
 | `dqcompass report` | (re)generate the Reporting Layer CSVs + `alerts.json` |
-| `dqcompass mapping` | write `reporting/supervisory_mapping.csv` (Appendix C) |
+| `dqcompass mapping` | write `reporting/supervisory_mapping.csv` |
 | `dqcompass catalogue-validate` | validate every rule against the meta-catalogue (exit 1 on error) |
 | `dqcompass gate --severity High` | run + exit 1 if any control at/above that severity broke |
 | `dqcompass serve` | start the authoring web app on 127.0.0.1:5001 |

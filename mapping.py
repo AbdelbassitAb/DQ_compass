@@ -1,10 +1,10 @@
 """
 mapping.py
 
-Supervisory Mapping (Appendix C). From the Control Catalogue, generate:
-  - C.2  Requirement -> Control implemented -> Evidence generated -> Output
-  - C.3  per-rule control-to-evidence traceability (rule -> last run + hash)
-  - C.4  the key supervisory principles the solution demonstrates
+Supervisory Mapping. From the Control Catalogue, generate:
+  - requirement -> control implemented -> evidence generated -> output
+  - per-rule control-to-evidence traceability (rule -> last run + hash)
+  - the key supervisory principles the solution demonstrates
 
 A rule's supervisory requirement is its explicit `regulatory_ref` if set,
 otherwise a default derived from the DQ dimension.

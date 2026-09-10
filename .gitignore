@@ -5,8 +5,4 @@ __pycache__/
 .pytest_cache/
 build/
 dist/
-
-# Generated presentation material - rebuild with docs/build_*.py|js
-docs/*.pdf
-docs/*.pptx
 node_modules/

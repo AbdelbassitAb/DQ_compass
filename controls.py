@@ -3,7 +3,7 @@ controls.py
 
 Library of generic DQ controls.
 
-Key principle of the brief (Separation of Concerns): each function knows
+Key design principle (Separation of Concerns): each function knows
 NOTHING about a specific dataset. It receives a DataFrame + parameters and
 returns a standardised result. The same "check_completeness" serves any
 field, of any dataset, indefinitely.

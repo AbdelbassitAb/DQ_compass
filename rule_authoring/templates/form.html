@@ -28,7 +28,7 @@
       data-preview="{{ url_for('preview') }}">
 
   <fieldset>
-    <legend>Identity <small>(Appendix A.2)</small></legend>
+    <legend>Identity</legend>
     <div class="grid">
       <label>{{ flabel('Rule ID', 'rule_id', true) }}
         <input name="rule_id" value="{{ rule.rule_id }}" {{ 'readonly' if mode == 'edit' else '' }} required>
